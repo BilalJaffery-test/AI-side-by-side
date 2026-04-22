@@ -266,7 +266,7 @@
       <input type="password" id="key-gemini" placeholder="AIza..." oninput="updateKeyBorder(this,'#4285F4')"/>
     </div>
     <div class="key-field">
-      <label style="color:#00A4EF">Copilot (OpenAI key)</label>
+      <label style="color:#00A4EF">o3 (OpenAI key)</label>
       <input type="password" id="key-copilot" placeholder="sk-..." oninput="updateKeyBorder(this,'#00A4EF')"/>
     </div>
     <div class="key-note">
@@ -301,7 +301,7 @@
       { id: "claude",   name: "Claude",   company: "Anthropic", color: "#D97B4F" },
       { id: "chatgpt",  name: "ChatGPT",  company: "OpenAI",    color: "#10A37F" },
       { id: "gemini",   name: "Gemini",   company: "Google",    color: "#4285F4" },
-      { id: "copilot",  name: "Copilot",  company: "Microsoft", color: "#00A4EF" },
+      { id: "copilot",  name: "o3",       company: "OpenAI",    color: "#00A4EF" },
     ];
 
     // Render cards once on load
@@ -399,7 +399,7 @@
       return data.content?.[0]?.text || '';
     }
 
-    async function callOpenAI(prompt, apiKey) {
+    async function callOpenAI(prompt, apiKey, model = 'gpt-4o') {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -407,7 +407,7 @@
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: model,
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 1000
         })
@@ -465,7 +465,7 @@
           id: 'copilot',
           color: '#00A4EF',
           key: copilotKey,
-          fn: () => callOpenAI(prompt, copilotKey)
+          fn: () => callOpenAI(prompt, copilotKey, 'o3')
         },
       ];
 
