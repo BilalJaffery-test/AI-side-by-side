@@ -136,13 +136,12 @@
     .copy-btn {
       position: absolute; bottom: 10px; right: 12px;
       background: none; border: none; cursor: pointer;
-      color: #555; font-size: 13px; padding: 4px 6px;
+      color: #fff; font-size: 15px; padding: 4px 7px;
       border-radius: 6px; transition: all 0.15s;
-      opacity: 0; pointer-events: none;
+      opacity: 0.7;
     }
-    .model-card:hover .copy-btn { opacity: 1; pointer-events: auto; }
-    .copy-btn:hover { background: #2a2a30; color: #aaa; }
-    .copy-btn.copied { color: #d4f5a0; }
+    .copy-btn:hover { background: #2a2a30; opacity: 1; }
+    .copy-btn.copied { color: #d4f5a0; opacity: 1; }
     .model-body-wrap { position: relative; }
 
     #empty-state .icons { font-size: 36px; margin-bottom: 10px; opacity: 0.15; letter-spacing: 4px; }
@@ -223,7 +222,10 @@
       </div>
       <button id="synthesis-close" onclick="closeSynthesis()">✕ Close</button>
     </div>
-    <div id="synthesis-body"></div>
+    <div style="position:relative;">
+      <div id="synthesis-body"></div>
+      <button class="copy-btn" id="copy-synthesis" onclick="copySynthesis()" title="Copy synthesis">⎘</button>
+    </div>
   </div>
 
   <div id="empty-state">
@@ -624,6 +626,18 @@
     }
 
     // ── Copy ──────────────────────────────────────────────────
+    function copySynthesis() {
+      const body = document.getElementById('synthesis-body');
+      const text = body.textContent.trim();
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-synthesis');
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+
     function copyResponse(id) {
       const body = document.getElementById(`body-${id}`);
       if (!body.className.includes('has-result')) return;
