@@ -133,6 +133,18 @@
     #synthesis-close:hover { background: rgba(255,255,255,0.28); }
     #synthesis-body { padding: 18px 20px; font-size: 14px; line-height: 1.7; color: #e8e8e8; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; max-height: 50vh; overflow-y: auto; }
 
+    .copy-btn {
+      position: absolute; bottom: 10px; right: 12px;
+      background: none; border: none; cursor: pointer;
+      color: #555; font-size: 13px; padding: 4px 6px;
+      border-radius: 6px; transition: all 0.15s;
+      opacity: 0; pointer-events: none;
+    }
+    .model-card:hover .copy-btn { opacity: 1; pointer-events: auto; }
+    .copy-btn:hover { background: #2a2a30; color: #aaa; }
+    .copy-btn.copied { color: #d4f5a0; }
+    .model-body-wrap { position: relative; }
+
     #empty-state .icons { font-size: 36px; margin-bottom: 10px; opacity: 0.15; letter-spacing: 4px; }
     #empty-state p { font-family: 'Instrument Serif', serif; font-size: 17px; font-style: italic; color: #333; }
   </style>
@@ -257,7 +269,10 @@
               </label>
             </div>
           </div>
-          <div class="model-body" id="body-${m.id}"><span style="color:#444">Response will appear here</span></div>
+          <div class="model-body-wrap">
+            <div class="model-body" id="body-${m.id}"><span style="color:#444">Response will appear here</span></div>
+            <button class="copy-btn" id="copy-${m.id}" onclick="copyResponse('${m.id}')" title="Copy response">⎘</button>
+          </div>
         `;
         container.appendChild(card);
       });
@@ -606,6 +621,19 @@
         btn.style.color = '#D97B4F';
         btn.style.border = '1px solid #D97B4F44';
       }
+    }
+
+    // ── Copy ──────────────────────────────────────────────────
+    function copyResponse(id) {
+      const body = document.getElementById(`body-${id}`);
+      if (!body.className.includes('has-result')) return;
+      const text = body.textContent.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(`copy-${id}`);
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 2000);
+      });
     }
 
     initCards();
