@@ -108,6 +108,31 @@
     .chat-msg-label { font-size: 10px; opacity: 0.5; margin-bottom: 2px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; }
 
     #empty-state { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; }
+    #synthesis-card {
+      margin: 0 32px 24px;
+      background: #18181b;
+      border-radius: 16px;
+      border: 1.5px solid #D97B4F55;
+      overflow: hidden;
+      animation: fadeIn 0.4s ease both;
+      display: none;
+    }
+    #synthesis-card.visible { display: block; }
+    #synthesis-header {
+      padding: 12px 18px;
+      background: linear-gradient(135deg, #D97B4F, #c4623a);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    #synthesis-header-left { display: flex; align-items: center; gap: 10px; }
+    #synthesis-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 17px; color: #fff; font-weight: 600; }
+    #synthesis-subtitle { font-size: 11px; color: #ffffff88; font-family: monospace; letter-spacing: 0.05em; }
+    #synthesis-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffffff33; flex-shrink: 0; transition: all 0.3s; }
+    #synthesis-dot.loading { background: #fff; box-shadow: 0 0 8px #fff; animation: pulse 1s infinite; }
+    #synthesis-dot.done { background: #d4f5a0; }
+    #synthesis-close { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 10px; color: #fff; font-size: 11px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+    #synthesis-close:hover { background: rgba(255,255,255,0.28); }
+    #synthesis-body { padding: 18px 20px; font-size: 14px; line-height: 1.7; color: #e8e8e8; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; max-height: 50vh; overflow-y: auto; }
+
     #empty-state .icons { font-size: 36px; margin-bottom: 10px; opacity: 0.15; letter-spacing: 4px; }
     #empty-state p { font-family: 'Instrument Serif', serif; font-size: 17px; font-style: italic; color: #333; }
   </style>
@@ -164,12 +189,30 @@
       <textarea id="prompt-input" rows="3" placeholder='Ask anything… e.g. "Explain quantum entanglement in simple terms"' oninput="onPromptInput()" onkeydown="onPromptKey(event)"></textarea>
       <div id="prompt-footer">
         <span id="prompt-hint">Ctrl + Enter to run</span>
-        <button id="run-btn" onclick="runAll()">Compare →</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="aggregate-btn" onclick="aggregateResponses()" style="background:#1e1e24;border:none;border-radius:8px;padding:8px 16px;color:#444;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;" disabled>⊕ Synthesise</button>
+          <button id="run-btn" onclick="runAll()">Compare →</button>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="results"></div>
+
+  <!-- Synthesis card -->
+  <div id="synthesis-card">
+    <div id="synthesis-header">
+      <div id="synthesis-header-left">
+        <div id="synthesis-dot"></div>
+        <div>
+          <div id="synthesis-title">✦ Synthesis</div>
+          <div id="synthesis-subtitle">Aggregated by Claude · Anthropic</div>
+        </div>
+      </div>
+      <button id="synthesis-close" onclick="closeSynthesis()">✕ Close</button>
+    </div>
+    <div id="synthesis-body"></div>
+  </div>
 
   <div id="empty-state">
     <div class="icons">🤖🤖🤖🤖</div>
@@ -295,6 +338,7 @@
       const card = document.getElementById(`card-${id}`);
       card.style.boxShadow = 'none';
       document.getElementById(`retry-${id}`).disabled = false;
+      updateAggregateBtn();
 
       if (conversationMode && histories[id].length > 2) {
         // Show history + new response
@@ -462,6 +506,84 @@
           setCardError(id, err.message);
         }
       });
+    }
+
+    // ── Synthesis ──────────────────────────────────────────────
+    async function aggregateResponses() {
+      const prompt = document.getElementById('prompt-input').value.trim();
+      const responses = [];
+
+      MODELS.forEach(m => {
+        const body = document.getElementById(`body-${m.id}`);
+        const enabled = document.getElementById(`toggle-${m.id}`).checked;
+        if (!enabled) return;
+        const text = body.className.includes('has-result') ? body.textContent.trim() : null;
+        if (text) responses.push({ name: m.name, text });
+      });
+
+      if (responses.length < 2) {
+        alert('Need at least 2 AI responses to synthesise. Run a prompt first.');
+        return;
+      }
+
+      const card = document.getElementById('synthesis-card');
+      const dot = document.getElementById('synthesis-dot');
+      const body = document.getElementById('synthesis-body');
+      card.classList.add('visible');
+      dot.className = 'loading';
+      body.textContent = 'Synthesising responses…';
+
+      const responseBlock = responses.map(r => `=== ${r.name} ===\n${r.text}`).join('\n\n');
+      const systemPrompt = `You are a neutral synthesis engine. You will be given a question and responses to it from multiple AI models. Your task is to synthesise these into one comprehensive, balanced answer that:
+- Captures the strongest points from each response
+- Resolves any contradictions fairly
+- Does not favour any single AI's perspective
+- Is concise but complete
+- Does not mention which AI said what`;
+
+      const userPrompt = `Original question: "${prompt}"\n\nResponses from ${responses.length} AI models:\n\n${responseBlock}\n\nPlease synthesise these into one comprehensive, balanced answer.`;
+
+      try {
+        const apiKey = document.getElementById('key-claude').value.trim();
+        if (!apiKey) throw new Error('Claude API key needed for synthesis. Add it in ⚙ API Keys.');
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+          body: JSON.stringify({
+            model: 'claude-opus-4-5',
+            max_tokens: 1500,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }]
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || 'Claude API error');
+        const text = data.content?.[0]?.text || '';
+        dot.className = 'done';
+        body.textContent = text;
+      } catch (err) {
+        dot.className = '';
+        body.style.color = '#ff8a8a';
+        body.textContent = '⚠ ' + err.message;
+      }
+    }
+
+    function closeSynthesis() {
+      document.getElementById('synthesis-card').classList.remove('visible');
+    }
+
+    function updateAggregateBtn() {
+      const hasResults = MODELS.some(m => {
+        const body = document.getElementById(`body-${m.id}`);
+        return body && body.className.includes('has-result');
+      });
+      const btn = document.getElementById('aggregate-btn');
+      if (hasResults) {
+        btn.disabled = false;
+        btn.style.background = 'linear-gradient(135deg, #2a1a0e, #3a2210)';
+        btn.style.color = '#D97B4F';
+        btn.style.border = '1px solid #D97B4F44';
+      }
     }
 
     initCards();
