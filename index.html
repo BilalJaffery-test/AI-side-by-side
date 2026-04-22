@@ -7,160 +7,109 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: #0e0e11;
-      color: #e8e8e8;
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    body { background: #0e0e11; color: #e8e8e8; font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
 
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
     @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 
-    #header {
-      padding: 24px 32px 20px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      border-bottom: 1px solid #1e1e24;
-      background: #0e0e11;
-    }
-    #header h1 {
-      font-family: 'Instrument Serif', Georgia, serif;
-      font-size: clamp(22px, 4vw, 34px);
-      font-weight: 400;
-      letter-spacing: -0.01em;
-      color: #e8e8e8;
-    }
-    #header p { margin-top: 4px; color: #555; font-size: 13px; }
+    /* Header */
+    #header { padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e1e24; gap: 16px; flex-wrap: wrap; }
+    #header h1 { font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(20px, 3vw, 30px); font-weight: 400; letter-spacing: -0.01em; color: #f0f0f0; }
+    #header p { margin-top: 3px; color: #555; font-size: 12px; }
+    #header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-    #settings-btn {
-      background: transparent;
-      border: 1px solid #2a2a30;
-      border-radius: 8px;
-      padding: 8px 14px;
-      color: #aaa;
-      font-size: 13px;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: background 0.15s;
-      white-space: nowrap;
-    }
-    #settings-btn:hover { background: #0e0e11; }
+    /* Toggle switch */
+    .toggle-group { display: flex; align-items: center; gap: 8px; background: #13131a; border: 1px solid #2a2a30; border-radius: 8px; padding: 6px 12px; }
+    .toggle-label { font-size: 12px; color: #888; white-space: nowrap; }
+    .toggle-switch { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #2a2a30; border-radius: 18px; cursor: pointer; transition: background 0.2s; }
+    .toggle-slider:before { content: ''; position: absolute; width: 12px; height: 12px; left: 3px; top: 3px; background: #666; border-radius: 50%; transition: all 0.2s; }
+    .toggle-switch input:checked + .toggle-slider { background: #D97B4F; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(16px); background: #fff; }
+
+    #settings-btn { background: transparent; border: 1px solid #2a2a30; border-radius: 8px; padding: 7px 13px; color: #aaa; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; white-space: nowrap; }
+    #settings-btn:hover { background: #1e1e24; }
     #settings-btn.active { background: #2a2a30; }
 
-    #settings-panel {
-      display: none;
-      background: #13131a;
-      border-bottom: 1px solid #1e1e24;
-      padding: 20px 32px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
+    /* Settings */
+    #settings-panel { display: none; background: #13131a; border-bottom: 1px solid #1e1e24; padding: 18px 32px; flex-wrap: wrap; gap: 16px; }
     #settings-panel.open { display: flex; }
-
-    .key-field { flex: 1 1 200px; min-width: 180px; }
-    .key-field label {
-      display: block; font-size: 11px; margin-bottom: 6px;
-      font-family: monospace; letter-spacing: 0.08em; text-transform: uppercase;
-    }
-    .key-field input {
-      width: 100%; background: #fff; border: 1px solid #ddd; border-radius: 8px;
-      padding: 8px 12px; color: #333; font-size: 13px; font-family: monospace;
-      transition: border-color 0.2s;
-    }
+    .key-field { flex: 1 1 180px; min-width: 160px; }
+    .key-field label { display: block; font-size: 11px; margin-bottom: 5px; font-family: monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+    .key-field input { width: 100%; background: #1c1c24; border: 1px solid #2a2a30; border-radius: 8px; padding: 7px 11px; color: #e0e0e0; font-size: 12px; font-family: monospace; transition: border-color 0.2s; }
     .key-field input:focus { outline: none; }
-    .key-note { flex: 1 1 200px; min-width: 180px; display: flex; align-items: flex-end; }
-    .key-note p { font-size: 12px; color: #444; line-height: 1.5; }
+    .key-note { flex: 1 1 180px; min-width: 160px; display: flex; align-items: flex-end; }
+    .key-note p { font-size: 11px; color: #444; line-height: 1.5; }
 
-    #prompt-area {
-      padding: 24px 32px;
-      border-bottom: 1px solid #1e1e24;
-      background: #0e0e11;
-    }
-    #prompt-box {
-      background: #13131a; border: 1px solid #2a2a30; border-radius: 14px;
-      display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.2s;
-    }
+    /* Prompt */
+    #prompt-area { padding: 20px 32px; border-bottom: 1px solid #1e1e24; }
+    #prompt-box { background: #13131a; border: 1px solid #2a2a30; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.2s; }
     #prompt-box:focus-within { border-color: #3a3a44; }
-    #prompt-input {
-      background: transparent; border: none; padding: 16px 18px 8px;
-      color: #e8e8e8; font-size: 15px; font-family: 'DM Sans', sans-serif;
-      resize: vertical; line-height: 1.6; min-height: 80px; width: 100%;
-    }
+    #prompt-input { background: transparent; border: none; padding: 14px 18px 8px; color: #e8e8e8; font-size: 15px; font-family: 'DM Sans', sans-serif; resize: vertical; line-height: 1.6; min-height: 72px; width: 100%; }
     #prompt-input:focus { outline: none; }
-    #prompt-input::placeholder { color: #555; }
-    #prompt-footer {
-      padding: 8px 14px 10px; display: flex;
-      justify-content: space-between; align-items: center;
-    }
-    #prompt-hint { font-size: 11px; color: #ccc; }
-    #run-btn {
-      background: #1e1e24; border: none; border-radius: 8px; padding: 9px 22px;
-      color: #444; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
-      cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
-    }
+    #prompt-input::placeholder { color: #444; }
+    #prompt-footer { padding: 7px 14px 9px; display: flex; justify-content: space-between; align-items: center; }
+    #prompt-hint { font-size: 11px; color: #333; }
+    #run-btn { background: #1e1e24; border: none; border-radius: 8px; padding: 8px 20px; color: #444; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; }
     #run-btn.ready { background: linear-gradient(135deg, #D97B4F, #c4623a); color: #fff; }
     #run-btn.ready:hover { opacity: 0.9; }
 
-    #results {
-      flex: 1; padding: 24px 32px; display: flex;
-      gap: 16px; flex-wrap: wrap; align-items: flex-start;
-    }
+    /* Conversation history bar */
+    #history-bar { display: none; padding: 8px 32px; background: #0e0e11; border-bottom: 1px solid #1e1e24; align-items: center; justify-content: space-between; }
+    #history-bar.visible { display: flex; }
+    #history-info { font-size: 12px; color: #555; }
+    #history-info span { color: #D97B4F; }
+    #clear-history-btn { font-size: 11px; color: #555; background: none; border: 1px solid #2a2a30; border-radius: 6px; padding: 3px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    #clear-history-btn:hover { color: #aaa; border-color: #444; }
 
-    .model-card {
-      flex: 1 1 0; min-width: 220px; background: #18181b; border-radius: 16px;
-      border: 1.5px solid #2a2a30; display: flex; flex-direction: column;
-      overflow: hidden; transition: box-shadow 0.2s; animation: fadeIn 0.3s ease both;
-      box-shadow: none;
-    }
-    .model-card-header {
-      padding: 12px 18px; display: flex; align-items: center;
-      justify-content: space-between; gap: 10px;
-    }
-    .model-card-header-left { display: flex; align-items: center; gap: 10px; }
-    .status-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #ffffff55; flex-shrink: 0; transition: all 0.3s;
-    }
+    /* Results */
+    #results { flex: 1; padding: 20px 32px; display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+
+    .model-card { flex: 1 1 0; min-width: 200px; background: #18181b; border-radius: 16px; border: 1.5px solid #2a2a30; display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 0.2s, opacity 0.2s; animation: fadeIn 0.3s ease both; }
+    .model-card.disabled-card { opacity: 0.35; }
+
+    .model-card-header { padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .model-card-header-left { display: flex; align-items: center; gap: 9px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffffff33; flex-shrink: 0; transition: all 0.3s; }
     .status-dot.loading { background: #fff; box-shadow: 0 0 8px #fff; animation: pulse 1s infinite; }
     .status-dot.done { background: #d4f5a0; }
     .status-dot.error { background: #ff8a8a; }
 
-    .model-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 17px; color: #fff; font-weight: 600; }
-    .model-company { font-size: 11px; color: #ffffff99; font-family: monospace; letter-spacing: 0.05em; }
+    .model-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; color: #fff; font-weight: 600; }
+    .model-company { font-size: 10px; color: #ffffff88; font-family: monospace; letter-spacing: 0.05em; }
 
-    .retry-btn {
-      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
-      border-radius: 6px; padding: 4px 10px; color: #fff; font-size: 11px;
-      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
-      white-space: nowrap; flex-shrink: 0;
-    }
-    .retry-btn:hover { background: rgba(255,255,255,0.35); }
-    .retry-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    /* Card controls (retry + AI toggle) */
+    .card-controls { display: flex; align-items: center; gap: 6px; }
+    .retry-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 9px; color: #fff; font-size: 11px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .retry-btn:hover { background: rgba(255,255,255,0.28); }
+    .retry-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .model-body {
-      flex: 1; padding: 16px 18px; font-size: 14px; line-height: 1.65;
-      color: #bbb; font-family: 'DM Sans', sans-serif; white-space: pre-wrap;
-      overflow-y: auto; min-height: 120px; max-height: 60vh;
-    }
+    /* AI on/off toggle in card */
+    .ai-toggle { position: relative; width: 30px; height: 16px; flex-shrink: 0; }
+    .ai-toggle input { opacity: 0; width: 0; height: 0; }
+    .ai-toggle-slider { position: absolute; inset: 0; background: rgba(0,0,0,0.3); border-radius: 16px; cursor: pointer; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.2); }
+    .ai-toggle-slider:before { content: ''; position: absolute; width: 10px; height: 10px; left: 2px; top: 2px; background: rgba(255,255,255,0.5); border-radius: 50%; transition: all 0.2s; }
+    .ai-toggle input:checked + .ai-toggle-slider { background: rgba(255,255,255,0.25); }
+    .ai-toggle input:checked + .ai-toggle-slider:before { transform: translateX(14px); background: #fff; }
+
+    .model-body { flex: 1; padding: 14px 16px; font-size: 13px; line-height: 1.65; color: #555; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; overflow-y: auto; min-height: 100px; max-height: 60vh; }
     .model-body.has-result { color: #e8e8e8; }
     .model-body.has-error { color: #ff8a8a; }
     .model-body .thinking { font-style: italic; }
 
-    #empty-state {
-      position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%);
-      text-align: center; pointer-events: none;
-    }
-    #empty-state .icons { font-size: 40px; margin-bottom: 12px; opacity: 0.2; letter-spacing: 4px; }
-    #empty-state p { color: #2a2a30; font-family: 'Instrument Serif', serif; font-size: 18px; font-style: italic; color: #ccc; }
+    /* Chat history display */
+    .chat-history { padding: 0 16px 8px; display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid #2a2a30; margin-bottom: 2px; }
+    .chat-msg { font-size: 12px; line-height: 1.5; padding: 6px 10px; border-radius: 8px; }
+    .chat-msg.user { background: #1e1e28; color: #aaa; align-self: flex-end; max-width: 90%; }
+    .chat-msg.assistant { background: #13131a; color: #888; max-width: 90%; }
+    .chat-msg-label { font-size: 10px; opacity: 0.5; margin-bottom: 2px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    #empty-state { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; }
+    #empty-state .icons { font-size: 36px; margin-bottom: 10px; opacity: 0.15; letter-spacing: 4px; }
+    #empty-state p { font-family: 'Instrument Serif', serif; font-size: 17px; font-style: italic; color: #333; }
   </style>
 </head>
 <body>
@@ -170,7 +119,16 @@
       <h1>Side by Side <em>AI</em></h1>
       <p>Compare Claude, ChatGPT, Gemini &amp; o3 in one prompt</p>
     </div>
-    <button id="settings-btn" onclick="toggleSettings()">⚙ API Keys</button>
+    <div id="header-right">
+      <div class="toggle-group">
+        <span class="toggle-label">💬 Conversation mode</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="convo-toggle" onchange="onConvoToggle()"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <button id="settings-btn" onclick="toggleSettings()">⚙ API Keys</button>
+    </div>
   </div>
 
   <div id="settings-panel">
@@ -193,6 +151,12 @@
     <div class="key-note">
       <p>Keys stay in your browser only.<br/>Never stored — session memory only.</p>
     </div>
+  </div>
+
+  <!-- Conversation history indicator -->
+  <div id="history-bar">
+    <div id="history-info">Conversation mode on — <span id="turn-count">0</span> turn(s) in memory</div>
+    <button id="clear-history-btn" onclick="clearHistory()">✕ Clear history</button>
   </div>
 
   <div id="prompt-area">
@@ -220,8 +184,12 @@
       { id: "copilot", name: "o3",      company: "OpenAI",    color: "#00A4EF" },
     ];
 
+    // State
     const lastPrompt = {};
+    const histories = { claude: [], chatgpt: [], gemini: [], copilot: [] };
+    let conversationMode = false;
 
+    // ── Card init ──────────────────────────────────────────────
     function initCards() {
       const container = document.getElementById('results');
       MODELS.forEach(m => {
@@ -237,7 +205,13 @@
                 <div class="model-company">${m.company}</div>
               </div>
             </div>
-            <button class="retry-btn" id="retry-${m.id}" onclick="retryCard('${m.id}')" disabled>↺ Retry</button>
+            <div class="card-controls">
+              <button class="retry-btn" id="retry-${m.id}" onclick="retryCard('${m.id}')" disabled>↺ Retry</button>
+              <label class="ai-toggle" title="Enable/disable ${m.name}">
+                <input type="checkbox" id="toggle-${m.id}" checked onchange="onAIToggle('${m.id}')"/>
+                <span class="ai-toggle-slider"></span>
+              </label>
+            </div>
           </div>
           <div class="model-body" id="body-${m.id}"><span style="color:#444">Response will appear here</span></div>
         `;
@@ -245,13 +219,14 @@
       });
     }
 
+    // ── UI helpers ─────────────────────────────────────────────
     function toggleSettings() {
       document.getElementById('settings-panel').classList.toggle('open');
       document.getElementById('settings-btn').classList.toggle('active');
     }
 
     function updateKeyBorder(input, color) {
-      input.style.borderColor = input.value ? color : '#ddd';
+      input.style.borderColor = input.value ? color : '#2a2a30';
     }
 
     function onPromptInput() {
@@ -263,6 +238,33 @@
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) runAll();
     }
 
+    function onAIToggle(id) {
+      const enabled = document.getElementById(`toggle-${id}`).checked;
+      document.getElementById(`card-${id}`).classList.toggle('disabled-card', !enabled);
+    }
+
+    function onConvoToggle() {
+      conversationMode = document.getElementById('convo-toggle').checked;
+      document.getElementById('history-bar').classList.toggle('visible', conversationMode);
+      if (!conversationMode) clearHistory();
+    }
+
+    function clearHistory() {
+      MODELS.forEach(m => histories[m.id] = []);
+      updateTurnCount();
+      // Clear chat history displays
+      MODELS.forEach(m => {
+        const existing = document.getElementById(`history-${m.id}`);
+        if (existing) existing.remove();
+      });
+    }
+
+    function updateTurnCount() {
+      const turns = Math.max(...MODELS.map(m => Math.floor(histories[m.id].length / 2)));
+      document.getElementById('turn-count').textContent = Math.max(0, turns);
+    }
+
+    // ── Card state setters ─────────────────────────────────────
     function setCardLoading(id, color) {
       document.getElementById(`dot-${id}`).className = 'status-dot loading';
       const body = document.getElementById(`body-${id}`);
@@ -272,13 +274,54 @@
       document.getElementById(`retry-${id}`).disabled = true;
     }
 
-    function setCardResult(id, text) {
+    function setCardResult(id, text, prompt) {
       document.getElementById(`dot-${id}`).className = 'status-dot done';
+      const card = document.getElementById(`card-${id}`);
+      card.style.boxShadow = 'none';
+      document.getElementById(`retry-${id}`).disabled = false;
+
+      if (conversationMode && histories[id].length > 2) {
+        // Show history + new response
+        renderCardWithHistory(id, text);
+      } else {
+        const body = document.getElementById(`body-${id}`);
+        body.className = 'model-body has-result';
+        body.textContent = text;
+      }
+    }
+
+    function renderCardWithHistory(id) {
       const body = document.getElementById(`body-${id}`);
       body.className = 'model-body has-result';
-      body.textContent = text;
-      document.getElementById(`card-${id}`).style.boxShadow = 'none';
-      document.getElementById(`retry-${id}`).disabled = false;
+      body.innerHTML = '';
+
+      // Show previous turns condensed
+      const hist = histories[id];
+      if (hist.length > 2) {
+        const histDiv = document.createElement('div');
+        histDiv.className = 'chat-history';
+        for (let i = 0; i < hist.length - 2; i++) {
+          const msg = hist[i];
+          const div = document.createElement('div');
+          div.className = `chat-msg ${msg.role}`;
+          const label = document.createElement('div');
+          label.className = 'chat-msg-label';
+          label.textContent = msg.role === 'user' ? 'You' : 'AI';
+          const content = document.createElement('div');
+          const text = msg.content.length > 120 ? msg.content.slice(0, 120) + '…' : msg.content;
+          content.textContent = text;
+          div.appendChild(label);
+          div.appendChild(content);
+          histDiv.appendChild(div);
+        }
+        body.appendChild(histDiv);
+      }
+
+      // Latest response
+      const latest = document.createElement('div');
+      latest.style.padding = '8px 0 0';
+      latest.textContent = hist[hist.length - 1]?.content || '';
+      body.appendChild(latest);
     }
 
     function setCardError(id, msg) {
@@ -290,112 +333,115 @@
       document.getElementById(`retry-${id}`).disabled = false;
     }
 
-    async function retryCard(id) {
-      if (!lastPrompt[id]) return;
-      const model = MODELS.find(m => m.id === id);
-      const prompt = lastPrompt[id];
-      const openaiKey  = document.getElementById('key-openai').value.trim();
-      const geminiKey  = document.getElementById('key-gemini').value.trim();
-      const copilotKey = document.getElementById('key-copilot').value.trim();
-      const claudeKey  = document.getElementById('key-claude').value.trim();
-
-      const map = {
-        claude:  { key: claudeKey,  fn: () => callClaude(prompt) },
-        chatgpt: { key: openaiKey,  fn: () => callOpenAI(prompt, openaiKey) },
-        gemini:  { key: geminiKey,  fn: () => callGemini(prompt, geminiKey) },
-        copilot: { key: copilotKey, fn: () => callOpenAI(prompt, copilotKey, 'o3') },
-      };
-
-      const { key, fn } = map[id];
-      if (!key) { setCardError(id, 'No API key provided. Click ⚙ API Keys above to add one.'); return; }
-      setCardLoading(id, model.color);
-      try {
-        const text = await fn();
-        setCardResult(id, text);
-      } catch (err) {
-        setCardError(id, err.message);
-      }
+    function setCardDisabled(id) {
+      document.getElementById(`dot-${id}`).className = 'status-dot';
+      const body = document.getElementById(`body-${id}`);
+      body.className = 'model-body';
+      body.innerHTML = `<span style="color:#333">Disabled — toggle on to include</span>`;
     }
 
-    async function callClaude(prompt) {
+    // ── API calls ──────────────────────────────────────────────
+    async function callClaude(messages) {
       const apiKey = document.getElementById('key-claude').value.trim();
       if (!apiKey) throw new Error('No Claude API key provided. Add it in ⚙ API Keys.');
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-opus-4-5',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompt }]
-        })
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 1000, messages })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || 'Claude API error');
       return data.content?.[0]?.text || '';
     }
 
-    async function callOpenAI(prompt, apiKey, model = 'gpt-4o') {
+    async function callOpenAI(messages, apiKey, model = 'gpt-4o') {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [{ role: 'user', content: prompt }],
-          ...(model === 'o3' ? { max_completion_tokens: 1000 } : { max_tokens: 1000 })
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model, messages, ...(model === 'o3' ? { max_completion_tokens: 1000 } : { max_tokens: 1000 }) })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || 'OpenAI API error');
       return data.choices?.[0]?.message?.content || '';
     }
 
-    async function callGemini(prompt, apiKey) {
+    async function callGemini(messages, apiKey) {
+      // Convert messages to Gemini format
+      const contents = messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        }
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) }
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || 'Gemini API error');
       return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
 
-    async function runAll() {
-      const prompt = document.getElementById('prompt-input').value.trim();
-      if (!prompt) return;
+    // ── Run logic ──────────────────────────────────────────────
+    function buildMessages(id, prompt) {
+      if (!conversationMode) return [{ role: 'user', content: prompt }];
+      return [...histories[id], { role: 'user', content: prompt }];
+    }
 
-      document.getElementById('empty-state').style.display = 'none';
-
-      const claudeKey  = document.getElementById('key-claude').value.trim();
+    async function runSingle(id, prompt) {
       const openaiKey  = document.getElementById('key-openai').value.trim();
       const geminiKey  = document.getElementById('key-gemini').value.trim();
       const copilotKey = document.getElementById('key-copilot').value.trim();
+      const claudeKey  = document.getElementById('key-claude').value.trim();
 
-      const runners = [
-        { id: 'claude',  color: '#D97B4F', key: claudeKey,  fn: () => callClaude(prompt) },
-        { id: 'chatgpt', color: '#10A37F', key: openaiKey,  fn: () => callOpenAI(prompt, openaiKey) },
-        { id: 'gemini',  color: '#4285F4', key: geminiKey,  fn: () => callGemini(prompt, geminiKey) },
-        { id: 'copilot', color: '#00A4EF', key: copilotKey, fn: () => callOpenAI(prompt, copilotKey, 'o3') },
-      ];
+      const keyMap  = { claude: claudeKey, chatgpt: openaiKey, gemini: geminiKey, copilot: copilotKey };
+      const key = keyMap[id];
+      if (!key) throw new Error('No API key provided. Click ⚙ API Keys above to add one.');
 
-      runners.forEach(async ({ id, color, key, fn }) => {
+      const messages = buildMessages(id, prompt);
+
+      let text;
+      if (id === 'claude')  text = await callClaude(messages);
+      else if (id === 'chatgpt') text = await callOpenAI(messages, openaiKey);
+      else if (id === 'gemini')  text = await callGemini(messages, geminiKey);
+      else if (id === 'copilot') text = await callOpenAI(messages, copilotKey, 'o3');
+
+      // Save to history if convo mode
+      if (conversationMode) {
+        histories[id].push({ role: 'user', content: prompt });
+        histories[id].push({ role: 'assistant', content: text });
+        updateTurnCount();
+      }
+
+      return text;
+    }
+
+    async function retryCard(id) {
+      if (!lastPrompt[id]) return;
+      const model = MODELS.find(m => m.id === id);
+      setCardLoading(id, model.color);
+      try {
+        // Remove last exchange from history before retrying
+        if (conversationMode && histories[id].length >= 2) {
+          histories[id].splice(-2);
+          updateTurnCount();
+        }
+        const text = await runSingle(id, lastPrompt[id]);
+        setCardResult(id, text, lastPrompt[id]);
+      } catch (err) {
+        setCardError(id, err.message);
+      }
+    }
+
+    async function runAll() {
+      const prompt = document.getElementById('prompt-input').value.trim();
+      if (!prompt) return;
+      document.getElementById('empty-state').style.display = 'none';
+
+      MODELS.forEach(async ({ id, color }) => {
         lastPrompt[id] = prompt;
-        if (!key) { setCardError(id, 'No API key provided. Click ⚙ API Keys above to add one.'); return; }
+        const enabled = document.getElementById(`toggle-${id}`).checked;
+        if (!enabled) { setCardDisabled(id); return; }
+
         setCardLoading(id, color);
         try {
-          const text = await fn();
-          setCardResult(id, text);
+          const text = await runSingle(id, prompt);
+          setCardResult(id, text, prompt);
         } catch (err) {
           setCardError(id, err.message);
         }
