@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Side by Side</title>
+  <title>Side by Side AI</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #f5f5f7;
-      color: #1a1a1a;
+      background: #0e0e11;
+      color: #e8e8e8;
       font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
       display: flex;
@@ -29,37 +29,37 @@
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-      border-bottom: 1px solid #e0e0e5;
-      background: #fff;
+      border-bottom: 1px solid #1e1e24;
+      background: #0e0e11;
     }
     #header h1 {
       font-family: 'Instrument Serif', Georgia, serif;
       font-size: clamp(22px, 4vw, 34px);
       font-weight: 400;
       letter-spacing: -0.01em;
-      color: #1a1a1a;
+      color: #e8e8e8;
     }
-    #header p { margin-top: 4px; color: #999; font-size: 13px; }
+    #header p { margin-top: 4px; color: #555; font-size: 13px; }
 
     #settings-btn {
       background: transparent;
-      border: 1px solid #ddd;
+      border: 1px solid #2a2a30;
       border-radius: 8px;
       padding: 8px 14px;
-      color: #666;
+      color: #aaa;
       font-size: 13px;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
       transition: background 0.15s;
       white-space: nowrap;
     }
-    #settings-btn:hover { background: #f5f5f7; }
-    #settings-btn.active { background: #efefef; }
+    #settings-btn:hover { background: #0e0e11; }
+    #settings-btn.active { background: #2a2a30; }
 
     #settings-panel {
       display: none;
-      background: #fafafa;
-      border-bottom: 1px solid #e0e0e5;
+      background: #13131a;
+      border-bottom: 1px solid #1e1e24;
       padding: 20px 32px;
       flex-wrap: wrap;
       gap: 16px;
@@ -76,35 +76,35 @@
       padding: 8px 12px; color: #333; font-size: 13px; font-family: monospace;
       transition: border-color 0.2s;
     }
-    .key-field input:focus { outline: none; border-color: #aaa; }
+    .key-field input:focus { outline: none; }
     .key-note { flex: 1 1 200px; min-width: 180px; display: flex; align-items: flex-end; }
-    .key-note p { font-size: 12px; color: #aaa; line-height: 1.5; }
+    .key-note p { font-size: 12px; color: #444; line-height: 1.5; }
 
     #prompt-area {
       padding: 24px 32px;
-      border-bottom: 1px solid #e0e0e5;
-      background: #fff;
+      border-bottom: 1px solid #1e1e24;
+      background: #0e0e11;
     }
     #prompt-box {
-      background: #fafafa; border: 1px solid #e0e0e5; border-radius: 14px;
+      background: #13131a; border: 1px solid #2a2a30; border-radius: 14px;
       display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.2s;
     }
-    #prompt-box:focus-within { border-color: #bbb; }
+    #prompt-box:focus-within { border-color: #3a3a44; }
     #prompt-input {
       background: transparent; border: none; padding: 16px 18px 8px;
-      color: #1a1a1a; font-size: 15px; font-family: 'DM Sans', sans-serif;
+      color: #e8e8e8; font-size: 15px; font-family: 'DM Sans', sans-serif;
       resize: vertical; line-height: 1.6; min-height: 80px; width: 100%;
     }
     #prompt-input:focus { outline: none; }
-    #prompt-input::placeholder { color: #bbb; }
+    #prompt-input::placeholder { color: #555; }
     #prompt-footer {
       padding: 8px 14px 10px; display: flex;
       justify-content: space-between; align-items: center;
     }
     #prompt-hint { font-size: 11px; color: #ccc; }
     #run-btn {
-      background: #efefef; border: none; border-radius: 8px; padding: 9px 22px;
-      color: #bbb; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      background: #1e1e24; border: none; border-radius: 8px; padding: 9px 22px;
+      color: #444; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
       cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
     }
     #run-btn.ready { background: linear-gradient(135deg, #D97B4F, #c4623a); color: #fff; }
@@ -116,10 +116,10 @@
     }
 
     .model-card {
-      flex: 1 1 0; min-width: 220px; background: #fff; border-radius: 16px;
-      border: 1.5px solid #e8e8ec; display: flex; flex-direction: column;
+      flex: 1 1 0; min-width: 220px; background: #18181b; border-radius: 16px;
+      border: 1.5px solid #2a2a30; display: flex; flex-direction: column;
       overflow: hidden; transition: box-shadow 0.2s; animation: fadeIn 0.3s ease both;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      box-shadow: none;
     }
     .model-card-header {
       padding: 12px 18px; display: flex; align-items: center;
@@ -151,8 +151,8 @@
       color: #bbb; font-family: 'DM Sans', sans-serif; white-space: pre-wrap;
       overflow-y: auto; min-height: 120px; max-height: 60vh;
     }
-    .model-body.has-result { color: #1a1a1a; }
-    .model-body.has-error { color: #cc3333; }
+    .model-body.has-result { color: #e8e8e8; }
+    .model-body.has-error { color: #ff8a8a; }
     .model-body .thinking { font-style: italic; }
 
     #empty-state {
@@ -160,14 +160,14 @@
       text-align: center; pointer-events: none;
     }
     #empty-state .icons { font-size: 40px; margin-bottom: 12px; opacity: 0.2; letter-spacing: 4px; }
-    #empty-state p { font-family: 'Instrument Serif', serif; font-size: 18px; font-style: italic; color: #ccc; }
+    #empty-state p { color: #2a2a30; font-family: 'Instrument Serif', serif; font-size: 18px; font-style: italic; color: #ccc; }
   </style>
 </head>
 <body>
 
   <div id="header">
     <div>
-      <h1>AI <em>Side by Side</em></h1>
+      <h1>Side by Side <em>AI</em></h1>
       <p>Compare Claude, ChatGPT, Gemini &amp; o3 in one prompt</p>
     </div>
     <button id="settings-btn" onclick="toggleSettings()">⚙ API Keys</button>
@@ -239,7 +239,7 @@
             </div>
             <button class="retry-btn" id="retry-${m.id}" onclick="retryCard('${m.id}')" disabled>↺ Retry</button>
           </div>
-          <div class="model-body" id="body-${m.id}"><span style="color:#ccc">Response will appear here</span></div>
+          <div class="model-body" id="body-${m.id}"><span style="color:#444">Response will appear here</span></div>
         `;
         container.appendChild(card);
       });
