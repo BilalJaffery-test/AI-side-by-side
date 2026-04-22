@@ -238,9 +238,25 @@
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) runAll();
     }
 
-    function onAIToggle(id) {
+    async function onAIToggle(id) {
       const enabled = document.getElementById(`toggle-${id}`).checked;
       document.getElementById(`card-${id}`).classList.toggle('disabled-card', !enabled);
+
+      if (enabled && lastPrompt[id]) {
+        const model = MODELS.find(m => m.id === id);
+        setCardLoading(id, model.color);
+        try {
+          const text = await runSingle(id, lastPrompt[id]);
+          setCardResult(id, text, lastPrompt[id]);
+        } catch (err) {
+          setCardError(id, err.message);
+        }
+      }
+
+      if (!enabled) {
+        setCardDisabled(id);
+        document.getElementById(`retry-${id}`).disabled = true;
+      }
     }
 
     function onConvoToggle() {
