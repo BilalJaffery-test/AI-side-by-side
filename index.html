@@ -599,7 +599,7 @@
         if (!res.ok) throw new Error(data.error?.message || 'Claude API error');
         const text = data.content?.[0]?.text || '';
         dot.className = 'done';
-        body.textContent = text;
+        body.textContent = stripMarkdown(text);
       } catch (err) {
         dot.className = '';
         body.style.color = '#ff8a8a';
@@ -626,6 +626,18 @@
     }
 
     // ── Copy ──────────────────────────────────────────────────
+    function stripMarkdown(text) {
+      return text
+        .replace(/^#{1,6}\s+/gm, '')           // remove ## headers
+        .replace(/\*\*(.+?)\*\*/g, '$1')        // **bold**
+        .replace(/\*(.+?)\*/g, '$1')            // *italic*
+        .replace(/^[-*_]{3,}\s*$/gm, '──────') // --- dividers
+        .replace(/`{1,3}([^`]+)`{1,3}/g, '$1') // `code`
+        .replace(/^\s*[-*+]\s+/gm, '• ')        // bullet points
+        .replace(/^\s*\d+\.\s+/gm, '')          // numbered lists
+        .trim();
+    }
+
     function copySynthesis() {
       const body = document.getElementById('synthesis-body');
       const text = body.textContent.trim();
