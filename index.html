@@ -9,8 +9,8 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #0e0e11;
-      color: #e8e8e8;
+      background: #f5f5f7;
+      color: #1a1a1a;
       font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
       display: flex;
@@ -22,49 +22,44 @@
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
-    /* Header */
     #header {
       padding: 24px 32px 20px;
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-      border-bottom: 1px solid #1e1e24;
+      border-bottom: 1px solid #e0e0e5;
+      background: #fff;
     }
     #header h1 {
       font-family: 'Instrument Serif', Georgia, serif;
       font-size: clamp(22px, 4vw, 34px);
       font-weight: 400;
       letter-spacing: -0.01em;
-      color: #f0f0f0;
+      color: #1a1a1a;
     }
-    #header p {
-      margin-top: 4px;
-      color: #555;
-      font-size: 13px;
-    }
+    #header p { margin-top: 4px; color: #999; font-size: 13px; }
 
     #settings-btn {
       background: transparent;
-      border: 1px solid #2a2a30;
+      border: 1px solid #ddd;
       border-radius: 8px;
       padding: 8px 14px;
-      color: #aaa;
+      color: #666;
       font-size: 13px;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
       transition: background 0.15s;
       white-space: nowrap;
     }
-    #settings-btn:hover { background: #1e1e24; }
-    #settings-btn.active { background: #2a2a30; }
+    #settings-btn:hover { background: #f5f5f7; }
+    #settings-btn.active { background: #efefef; }
 
-    /* Settings panel */
     #settings-panel {
       display: none;
-      background: #13131a;
-      border-bottom: 1px solid #1e1e24;
+      background: #fafafa;
+      border-bottom: 1px solid #e0e0e5;
       padding: 20px 32px;
       flex-wrap: wrap;
       gap: 16px;
@@ -73,185 +68,111 @@
 
     .key-field { flex: 1 1 200px; min-width: 180px; }
     .key-field label {
-      display: block;
-      font-size: 11px;
-      margin-bottom: 6px;
-      font-family: monospace;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      display: block; font-size: 11px; margin-bottom: 6px;
+      font-family: monospace; letter-spacing: 0.08em; text-transform: uppercase;
     }
     .key-field input {
-      width: 100%;
-      background: #1c1c24;
-      border: 1px solid #2a2a30;
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: #e0e0e0;
-      font-size: 13px;
-      font-family: monospace;
+      width: 100%; background: #fff; border: 1px solid #ddd; border-radius: 8px;
+      padding: 8px 12px; color: #333; font-size: 13px; font-family: monospace;
       transition: border-color 0.2s;
     }
-    .key-field input:focus { outline: none; }
-    .key-note {
-      flex: 1 1 200px;
-      min-width: 180px;
-      display: flex;
-      align-items: flex-end;
-    }
-    .key-note p { font-size: 12px; color: #444; line-height: 1.5; }
+    .key-field input:focus { outline: none; border-color: #aaa; }
+    .key-note { flex: 1 1 200px; min-width: 180px; display: flex; align-items: flex-end; }
+    .key-note p { font-size: 12px; color: #aaa; line-height: 1.5; }
 
-    /* Prompt area */
     #prompt-area {
       padding: 24px 32px;
-      border-bottom: 1px solid #1e1e24;
+      border-bottom: 1px solid #e0e0e5;
+      background: #fff;
     }
     #prompt-box {
-      background: #13131a;
-      border: 1px solid #2a2a30;
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transition: border-color 0.2s;
+      background: #fafafa; border: 1px solid #e0e0e5; border-radius: 14px;
+      display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.2s;
     }
-    #prompt-box:focus-within { border-color: #3a3a44; }
+    #prompt-box:focus-within { border-color: #bbb; }
     #prompt-input {
-      background: transparent;
-      border: none;
-      padding: 16px 18px 8px;
-      color: #e8e8e8;
-      font-size: 15px;
-      font-family: 'DM Sans', sans-serif;
-      resize: vertical;
-      line-height: 1.6;
-      min-height: 80px;
-      width: 100%;
+      background: transparent; border: none; padding: 16px 18px 8px;
+      color: #1a1a1a; font-size: 15px; font-family: 'DM Sans', sans-serif;
+      resize: vertical; line-height: 1.6; min-height: 80px; width: 100%;
     }
     #prompt-input:focus { outline: none; }
+    #prompt-input::placeholder { color: #bbb; }
     #prompt-footer {
-      padding: 8px 14px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 8px 14px 10px; display: flex;
+      justify-content: space-between; align-items: center;
     }
-    #prompt-hint { font-size: 11px; color: #333; }
+    #prompt-hint { font-size: 11px; color: #ccc; }
     #run-btn {
-      background: #1e1e24;
-      border: none;
-      border-radius: 8px;
-      padding: 9px 22px;
-      color: #444;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: 'DM Sans', sans-serif;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.02em;
+      background: #efefef; border: none; border-radius: 8px; padding: 9px 22px;
+      color: #bbb; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
     }
-    #run-btn.ready {
-      background: linear-gradient(135deg, #D97B4F, #c4623a);
-      color: #fff;
-    }
+    #run-btn.ready { background: linear-gradient(135deg, #D97B4F, #c4623a); color: #fff; }
     #run-btn.ready:hover { opacity: 0.9; }
 
-    /* Results grid */
     #results {
-      flex: 1;
-      padding: 24px 32px;
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      align-items: flex-start;
+      flex: 1; padding: 24px 32px; display: flex;
+      gap: 16px; flex-wrap: wrap; align-items: flex-start;
     }
 
     .model-card {
-      flex: 1 1 0;
-      min-width: 220px;
-      background: #18181b;
-      border-radius: 16px;
-      border: 1.5px solid transparent;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transition: box-shadow 0.2s;
-      animation: fadeIn 0.3s ease both;
+      flex: 1 1 0; min-width: 220px; background: #fff; border-radius: 16px;
+      border: 1.5px solid #e8e8ec; display: flex; flex-direction: column;
+      overflow: hidden; transition: box-shadow 0.2s; animation: fadeIn 0.3s ease both;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
     .model-card-header {
-      padding: 12px 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      padding: 12px 18px; display: flex; align-items: center;
+      justify-content: space-between; gap: 10px;
     }
+    .model-card-header-left { display: flex; align-items: center; gap: 10px; }
     .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #ffffff33;
-      flex-shrink: 0;
-      transition: all 0.3s;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #ffffff55; flex-shrink: 0; transition: all 0.3s;
     }
     .status-dot.loading { background: #fff; box-shadow: 0 0 8px #fff; animation: pulse 1s infinite; }
     .status-dot.done { background: #d4f5a0; }
     .status-dot.error { background: #ff8a8a; }
 
-    .model-name {
-      font-family: 'Instrument Serif', Georgia, serif;
-      font-size: 17px;
-      color: #fff;
-      font-weight: 600;
+    .model-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 17px; color: #fff; font-weight: 600; }
+    .model-company { font-size: 11px; color: #ffffff99; font-family: monospace; letter-spacing: 0.05em; }
+
+    .retry-btn {
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 6px; padding: 4px 10px; color: #fff; font-size: 11px;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
+      white-space: nowrap; flex-shrink: 0;
     }
-    .model-company {
-      font-size: 11px;
-      color: #ffffff99;
-      font-family: monospace;
-      letter-spacing: 0.05em;
-    }
+    .retry-btn:hover { background: rgba(255,255,255,0.35); }
+    .retry-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
     .model-body {
-      flex: 1;
-      padding: 16px 18px;
-      font-size: 14px;
-      line-height: 1.65;
-      color: #555;
-      font-family: 'DM Sans', sans-serif;
-      white-space: pre-wrap;
-      overflow-y: auto;
-      min-height: 120px;
-      max-height: 60vh;
+      flex: 1; padding: 16px 18px; font-size: 14px; line-height: 1.65;
+      color: #bbb; font-family: 'DM Sans', sans-serif; white-space: pre-wrap;
+      overflow-y: auto; min-height: 120px; max-height: 60vh;
     }
-    .model-body.has-result { color: #e8e8e8; }
-    .model-body.has-error { color: #ff8a8a; }
+    .model-body.has-result { color: #1a1a1a; }
+    .model-body.has-error { color: #cc3333; }
     .model-body .thinking { font-style: italic; }
 
-    /* Empty state */
     #empty-state {
-      position: fixed;
-      bottom: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      color: #2a2a30;
-      pointer-events: none;
+      position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%);
+      text-align: center; pointer-events: none;
     }
-    #empty-state .icons { font-size: 40px; margin-bottom: 12px; opacity: 0.3; letter-spacing: 4px; }
-    #empty-state p {
-      font-family: 'Instrument Serif', serif;
-      font-size: 18px;
-      font-style: italic;
-    }
+    #empty-state .icons { font-size: 40px; margin-bottom: 12px; opacity: 0.2; letter-spacing: 4px; }
+    #empty-state p { font-family: 'Instrument Serif', serif; font-size: 18px; font-style: italic; color: #ccc; }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <div id="header">
     <div>
       <h1>AI <em>Side by Side</em></h1>
-      <p>Compare Claude, ChatGPT, Gemini &amp; Copilot in one prompt</p>
+      <p>Compare Claude, ChatGPT, Gemini &amp; o3 in one prompt</p>
     </div>
     <button id="settings-btn" onclick="toggleSettings()">⚙ API Keys</button>
   </div>
 
-  <!-- Settings Panel -->
   <div id="settings-panel">
     <div class="key-field">
       <label style="color:#D97B4F">Claude (Anthropic)</label>
@@ -274,7 +195,6 @@
     </div>
   </div>
 
-  <!-- Prompt Input -->
   <div id="prompt-area">
     <div id="prompt-box">
       <textarea id="prompt-input" rows="3" placeholder='Ask anything… e.g. "Explain quantum entanglement in simple terms"' oninput="onPromptInput()" onkeydown="onPromptKey(event)"></textarea>
@@ -285,12 +205,8 @@
     </div>
   </div>
 
-  <!-- Results -->
-  <div id="results">
-    <!-- Cards injected here -->
-  </div>
+  <div id="results"></div>
 
-  <!-- Empty state -->
   <div id="empty-state">
     <div class="icons">🤖🤖🤖🤖</div>
     <p>Enter a prompt above to compare responses</p>
@@ -298,49 +214,49 @@
 
   <script>
     const MODELS = [
-      { id: "claude",   name: "Claude",   company: "Anthropic", color: "#D97B4F" },
-      { id: "chatgpt",  name: "ChatGPT",  company: "OpenAI",    color: "#10A37F" },
-      { id: "gemini",   name: "Gemini",   company: "Google",    color: "#4285F4" },
-      { id: "copilot",  name: "o3",       company: "OpenAI",    color: "#00A4EF" },
+      { id: "claude",  name: "Claude",  company: "Anthropic", color: "#D97B4F" },
+      { id: "chatgpt", name: "ChatGPT", company: "OpenAI",    color: "#10A37F" },
+      { id: "gemini",  name: "Gemini",  company: "Google",    color: "#4285F4" },
+      { id: "copilot", name: "o3",      company: "OpenAI",    color: "#00A4EF" },
     ];
 
-    // Render cards once on load
+    const lastPrompt = {};
+
     function initCards() {
       const container = document.getElementById('results');
       MODELS.forEach(m => {
         const card = document.createElement('div');
         card.className = 'model-card';
         card.id = `card-${m.id}`;
-        card.style.borderColor = m.color + '33';
         card.innerHTML = `
           <div class="model-card-header" style="background:${m.color}">
-            <div class="status-dot" id="dot-${m.id}"></div>
-            <div>
-              <div class="model-name">${m.name}</div>
-              <div class="model-company">${m.company}</div>
+            <div class="model-card-header-left">
+              <div class="status-dot" id="dot-${m.id}"></div>
+              <div>
+                <div class="model-name">${m.name}</div>
+                <div class="model-company">${m.company}</div>
+              </div>
             </div>
+            <button class="retry-btn" id="retry-${m.id}" onclick="retryCard('${m.id}')" disabled>↺ Retry</button>
           </div>
-          <div class="model-body" id="body-${m.id}"><span style="color:#444">Response will appear here</span></div>
+          <div class="model-body" id="body-${m.id}"><span style="color:#ccc">Response will appear here</span></div>
         `;
         container.appendChild(card);
       });
     }
 
     function toggleSettings() {
-      const panel = document.getElementById('settings-panel');
-      const btn = document.getElementById('settings-btn');
-      panel.classList.toggle('open');
-      btn.classList.toggle('active');
+      document.getElementById('settings-panel').classList.toggle('open');
+      document.getElementById('settings-btn').classList.toggle('active');
     }
 
     function updateKeyBorder(input, color) {
-      input.style.borderColor = input.value ? color + '88' : '#2a2a30';
+      input.style.borderColor = input.value ? color : '#ddd';
     }
 
     function onPromptInput() {
       const val = document.getElementById('prompt-input').value.trim();
-      const btn = document.getElementById('run-btn');
-      btn.classList.toggle('ready', val.length > 0);
+      document.getElementById('run-btn').classList.toggle('ready', val.length > 0);
     }
 
     function onPromptKey(e) {
@@ -348,33 +264,57 @@
     }
 
     function setCardLoading(id, color) {
-      const dot = document.getElementById(`dot-${id}`);
+      document.getElementById(`dot-${id}`).className = 'status-dot loading';
       const body = document.getElementById(`body-${id}`);
-      const card = document.getElementById(`card-${id}`);
-      dot.className = 'status-dot loading';
       body.className = 'model-body';
       body.innerHTML = `<span class="thinking" style="color:${color}">Thinking…</span>`;
-      card.style.boxShadow = `0 0 0 2px ${color}66`;
+      document.getElementById(`card-${id}`).style.boxShadow = `0 0 0 2px ${color}44`;
+      document.getElementById(`retry-${id}`).disabled = true;
     }
 
     function setCardResult(id, text) {
-      const dot = document.getElementById(`dot-${id}`);
+      document.getElementById(`dot-${id}`).className = 'status-dot done';
       const body = document.getElementById(`body-${id}`);
-      const card = document.getElementById(`card-${id}`);
-      dot.className = 'status-dot done';
       body.className = 'model-body has-result';
       body.textContent = text;
-      card.style.boxShadow = 'none';
+      document.getElementById(`card-${id}`).style.boxShadow = 'none';
+      document.getElementById(`retry-${id}`).disabled = false;
     }
 
     function setCardError(id, msg) {
-      const dot = document.getElementById(`dot-${id}`);
+      document.getElementById(`dot-${id}`).className = 'status-dot error';
       const body = document.getElementById(`body-${id}`);
-      const card = document.getElementById(`card-${id}`);
-      dot.className = 'status-dot error';
       body.className = 'model-body has-error';
       body.textContent = '⚠ ' + msg;
-      card.style.boxShadow = 'none';
+      document.getElementById(`card-${id}`).style.boxShadow = 'none';
+      document.getElementById(`retry-${id}`).disabled = false;
+    }
+
+    async function retryCard(id) {
+      if (!lastPrompt[id]) return;
+      const model = MODELS.find(m => m.id === id);
+      const prompt = lastPrompt[id];
+      const openaiKey  = document.getElementById('key-openai').value.trim();
+      const geminiKey  = document.getElementById('key-gemini').value.trim();
+      const copilotKey = document.getElementById('key-copilot').value.trim();
+      const claudeKey  = document.getElementById('key-claude').value.trim();
+
+      const map = {
+        claude:  { key: claudeKey,  fn: () => callClaude(prompt) },
+        chatgpt: { key: openaiKey,  fn: () => callOpenAI(prompt, openaiKey) },
+        gemini:  { key: geminiKey,  fn: () => callGemini(prompt, geminiKey) },
+        copilot: { key: copilotKey, fn: () => callOpenAI(prompt, copilotKey, 'o3') },
+      };
+
+      const { key, fn } = map[id];
+      if (!key) { setCardError(id, 'No API key provided. Click ⚙ API Keys above to add one.'); return; }
+      setCardLoading(id, model.color);
+      try {
+        const text = await fn();
+        setCardResult(id, text);
+      } catch (err) {
+        setCardError(id, err.message);
+      }
     }
 
     async function callClaude(prompt) {
@@ -437,43 +377,21 @@
 
       document.getElementById('empty-state').style.display = 'none';
 
-      const claudeKey = document.getElementById('key-claude').value.trim();
-      const openaiKey = document.getElementById('key-openai').value.trim();
-      const geminiKey = document.getElementById('key-gemini').value.trim();
+      const claudeKey  = document.getElementById('key-claude').value.trim();
+      const openaiKey  = document.getElementById('key-openai').value.trim();
+      const geminiKey  = document.getElementById('key-gemini').value.trim();
       const copilotKey = document.getElementById('key-copilot').value.trim();
 
       const runners = [
-        {
-          id: 'claude',
-          color: '#D97B4F',
-          key: document.getElementById('key-claude').value.trim(),
-          fn: () => callClaude(prompt)
-        },
-        {
-          id: 'chatgpt',
-          color: '#10A37F',
-          key: openaiKey,
-          fn: () => callOpenAI(prompt, openaiKey)
-        },
-        {
-          id: 'gemini',
-          color: '#4285F4',
-          key: geminiKey,
-          fn: () => callGemini(prompt, geminiKey)
-        },
-        {
-          id: 'copilot',
-          color: '#00A4EF',
-          key: copilotKey,
-          fn: () => callOpenAI(prompt, copilotKey, 'o3')
-        },
+        { id: 'claude',  color: '#D97B4F', key: claudeKey,  fn: () => callClaude(prompt) },
+        { id: 'chatgpt', color: '#10A37F', key: openaiKey,  fn: () => callOpenAI(prompt, openaiKey) },
+        { id: 'gemini',  color: '#4285F4', key: geminiKey,  fn: () => callGemini(prompt, geminiKey) },
+        { id: 'copilot', color: '#00A4EF', key: copilotKey, fn: () => callOpenAI(prompt, copilotKey, 'o3') },
       ];
 
       runners.forEach(async ({ id, color, key, fn }) => {
-        if (key === '') {
-          setCardError(id, 'No API key provided. Click ⚙ API Keys above to add one.');
-          return;
-        }
+        lastPrompt[id] = prompt;
+        if (!key) { setCardError(id, 'No API key provided. Click ⚙ API Keys above to add one.'); return; }
         setCardLoading(id, color);
         try {
           const text = await fn();
