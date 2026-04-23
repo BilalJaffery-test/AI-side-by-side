@@ -117,6 +117,25 @@
     #empty-state .icons { font-size: 34px; margin-bottom: 10px; opacity: 0.15; letter-spacing: 4px; }
     #empty-state p { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: #333; }
 
+    /* ── Usage Bar ── */
+    #usage-bar { padding: 6px 28px; background: #0a0a0d; border-bottom: 1px solid #1e1e24; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    #usage-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .usage-pill { display: flex; align-items: center; gap: 5px; background: #13131a; border: 1px solid #2a2a30; border-radius: 20px; padding: 3px 10px; font-size: 11px; color: #666; font-family: monospace; }
+    .usage-pill .pill-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .usage-pill .pill-cost { color: #888; }
+    .usage-pill .pill-tokens { color: #555; }
+    #usage-total { font-size: 11px; color: #444; font-family: monospace; }
+    #usage-total span { color: #D97B4F; }
+    #check-balance-btn { font-size: 11px; color: #555; background: none; border: 1px solid #2a2a30; border-radius: 6px; padding: 3px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; white-space: nowrap; }
+    #check-balance-btn:hover { color: #aaa; border-color: #555; }
+    #balance-panel { display: none; padding: 10px 28px; background: #0a0a0d; border-bottom: 1px solid #1e1e24; flex-wrap: wrap; gap: 12px; }
+    #balance-panel.open { display: flex; }
+    .balance-card { flex: 1 1 140px; background: #13131a; border: 1px solid #2a2a30; border-radius: 10px; padding: 10px 14px; }
+    .balance-card-name { font-size: 10px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
+    .balance-card-amount { font-size: 18px; font-weight: 600; font-family: 'DM Sans', sans-serif; color: #e8e8e8; }
+    .balance-card-sub { font-size: 11px; color: #555; margin-top: 2px; }
+    .balance-card-loading { font-size: 12px; color: #444; font-style: italic; }
+
     /* ── EXPANDED VIEW ── */
     #expand-view { display: none; flex-direction: column; position: fixed; inset: 0; background: #0e0e11; z-index: 100; animation: slideIn 0.25s ease; width: 100%; }
     #expand-view.visible { display: flex; }
@@ -217,6 +236,47 @@
     <button id="clear-history-btn" onclick="clearHistory()">✕ Clear history</button>
   </div>
 
+  <!-- Usage bar -->
+  <div id="usage-bar">
+    <div id="usage-pills">
+      <div class="usage-pill" id="pill-claude"><span class="pill-dot" style="background:#D97B4F"></span><span class="pill-tokens">Claude</span><span class="pill-cost" id="cost-claude">—</span></div>
+      <div class="usage-pill" id="pill-chatgpt"><span class="pill-dot" style="background:#10A37F"></span><span class="pill-tokens">ChatGPT</span><span class="pill-cost" id="cost-chatgpt">—</span></div>
+      <div class="usage-pill" id="pill-gemini"><span class="pill-dot" style="background:#4285F4"></span><span class="pill-tokens">Gemini</span><span class="pill-cost" id="cost-gemini">—</span></div>
+      <div class="usage-pill" id="pill-copilot"><span class="pill-dot" style="background:#00A4EF"></span><span class="pill-tokens">o3</span><span class="pill-cost" id="cost-copilot">—</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div id="usage-total">Session total: <span id="total-cost">$0.0000</span></div>
+      <button id="check-balance-btn" onclick="toggleBalancePanel()">💳 Check balances</button>
+    </div>
+  </div>
+
+  <!-- Balance panel -->
+  <div id="balance-panel">
+    <div class="balance-card">
+      <div class="balance-card-name" style="color:#D97B4F">Claude</div>
+      <div class="balance-card-amount" id="bal-claude"><span class="balance-card-loading">Click to load</span></div>
+      <div class="balance-card-sub">Anthropic prepaid</div>
+    </div>
+    <div class="balance-card">
+      <div class="balance-card-name" style="color:#10A37F">ChatGPT</div>
+      <div class="balance-card-amount" id="bal-chatgpt"><span class="balance-card-loading">Click to load</span></div>
+      <div class="balance-card-sub">OpenAI prepaid</div>
+    </div>
+    <div class="balance-card">
+      <div class="balance-card-name" style="color:#4285F4">Gemini</div>
+      <div class="balance-card-amount" id="bal-gemini">Postpay</div>
+      <div class="balance-card-sub">Billed monthly by Google</div>
+    </div>
+    <div class="balance-card">
+      <div class="balance-card-name" style="color:#00A4EF">o3</div>
+      <div class="balance-card-amount" id="bal-copilot"><span class="balance-card-loading">Click to load</span></div>
+      <div class="balance-card-sub">OpenAI prepaid (shared)</div>
+    </div>
+    <div style="display:flex;align-items:flex-end;">
+      <button id="refresh-balances-btn" onclick="fetchBalances()" style="font-size:11px;color:#555;background:none;border:1px solid #2a2a30;border-radius:6px;padding:4px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;">↺ Refresh</button>
+    </div>
+  </div>
+
   <div id="prompt-area">
     <div id="prompt-box">
       <textarea id="prompt-input" rows="3" placeholder='Ask anything… e.g. "Explain quantum entanglement in simple terms"' oninput="onPromptInput()" onkeydown="onPromptKey(event)"></textarea>
@@ -308,6 +368,88 @@
     { id: 'gemini',  name: 'Gemini',  company: 'Google',    color: '#4285F4' },
     { id: 'copilot', name: 'o3',      company: 'OpenAI',    color: '#00A4EF' },
   ];
+
+  // ── Usage Tracking ───────────────────────────────────────
+  const PRICING = {
+    claude:  { input: 3.00,  output: 15.00  }, // $ per 1M tokens (claude-opus-4-5)
+    chatgpt: { input: 2.50,  output: 10.00  }, // $ per 1M tokens (gpt-4o)
+    gemini:  { input: 0.15,  output: 0.60   }, // $ per 1M tokens (gemini-2.5-flash)
+    copilot: { input: 10.00, output: 40.00  }, // $ per 1M tokens (o3)
+  };
+  const sessionUsage = { claude: { input:0, output:0 }, chatgpt: { input:0, output:0 }, gemini: { input:0, output:0 }, copilot: { input:0, output:0 } };
+
+  function addUsage(id, inputTokens, outputTokens) {
+    sessionUsage[id].input  += inputTokens  || 0;
+    sessionUsage[id].output += outputTokens || 0;
+    const p = PRICING[id];
+    const cost = (sessionUsage[id].input / 1e6) * p.input + (sessionUsage[id].output / 1e6) * p.output;
+    const tokens = sessionUsage[id].input + sessionUsage[id].output;
+    document.getElementById(`cost-${id}`).textContent = tokens > 0 ? `$${cost.toFixed(4)}` : '—';
+    // Update total
+    let total = 0;
+    Object.keys(sessionUsage).forEach(k => {
+      const pp = PRICING[k];
+      total += (sessionUsage[k].input / 1e6) * pp.input + (sessionUsage[k].output / 1e6) * pp.output;
+    });
+    document.getElementById('total-cost').textContent = `$${total.toFixed(4)}`;
+  }
+
+  async function fetchBalances() {
+    const claudeKey  = document.getElementById('key-claude').value.trim();
+    const openaiKey  = document.getElementById('key-openai').value.trim();
+
+    // Claude balance
+    if (claudeKey) {
+      document.getElementById('bal-claude').innerHTML = '<span class="balance-card-loading">Loading…</span>';
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/organizations/me/usage', {
+          headers: { 'x-api-key': claudeKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }
+        });
+        // Anthropic doesn't expose balance via API directly — show session usage instead
+        const p = PRICING.claude;
+        const cost = (sessionUsage.claude.input / 1e6) * p.input + (sessionUsage.claude.output / 1e6) * p.output;
+        document.getElementById('bal-claude').textContent = `$${cost.toFixed(4)} this session`;
+      } catch(e) {
+        document.getElementById('bal-claude').innerHTML = '<span class="balance-card-loading">Not available via API</span>';
+      }
+    }
+
+    // OpenAI balance (shared for ChatGPT + o3)
+    if (openaiKey) {
+      ['bal-chatgpt', 'bal-copilot'].forEach(id => {
+        document.getElementById(id).innerHTML = '<span class="balance-card-loading">Loading…</span>';
+      });
+      try {
+        const res = await fetch('https://api.openai.com/v1/dashboard/billing/credit_grants', {
+          headers: { 'Authorization': `Bearer ${openaiKey}` }
+        });
+        const data = await res.json();
+        if (data.total_available !== undefined) {
+          const bal = `$${data.total_available.toFixed(2)}`;
+          document.getElementById('bal-chatgpt').textContent = bal;
+          document.getElementById('bal-copilot').textContent = bal + ' (shared)';
+        } else {
+          throw new Error('unavailable');
+        }
+      } catch(e) {
+        // Fallback: show session cost
+        const chatCost = (sessionUsage.chatgpt.input / 1e6) * PRICING.chatgpt.input + (sessionUsage.chatgpt.output / 1e6) * PRICING.chatgpt.output;
+        const o3Cost   = (sessionUsage.copilot.input / 1e6) * PRICING.copilot.input + (sessionUsage.copilot.output / 1e6) * PRICING.copilot.output;
+        document.getElementById('bal-chatgpt').textContent = `$${chatCost.toFixed(4)} this session`;
+        document.getElementById('bal-copilot').textContent = `$${o3Cost.toFixed(4)} this session`;
+      }
+    }
+
+    // Gemini — postpay, show session estimate
+    const gemCost = (sessionUsage.gemini.input / 1e6) * PRICING.gemini.input + (sessionUsage.gemini.output / 1e6) * PRICING.gemini.output;
+    document.getElementById('bal-gemini').textContent = `~$${gemCost.toFixed(4)} this session`;
+  }
+
+  function toggleBalancePanel() {
+    const panel = document.getElementById('balance-panel');
+    const isOpen = panel.classList.toggle('open');
+    if (isOpen) fetchBalances();
+  }
 
   const SYSTEM_PROMPT = 'You are a helpful assistant. Always keep your answers concise and succinct. Avoid unnecessary padding, preamble, or repetition. Get straight to the point.';
 
@@ -440,6 +582,7 @@
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'Claude API error');
+    if (data.usage) addUsage('claude', data.usage.input_tokens, data.usage.output_tokens);
     return data.content?.[0]?.text || '';
   }
 
@@ -452,6 +595,8 @@
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'OpenAI API error');
+    const modelId = model === 'o3' ? 'copilot' : 'chatgpt';
+    if (data.usage) addUsage(modelId, data.usage.prompt_tokens, data.usage.completion_tokens);
     const msg = data.choices?.[0]?.message;
     return msg?.content || msg?.reasoning_content || '(No response returned)';
   }
@@ -476,6 +621,7 @@
         throw new Error('Gemini is experiencing high demand. Please try the Retry button.');
       }
       if (!res.ok) throw new Error(errMsg || 'Gemini API error');
+      if (data.usageMetadata) addUsage('gemini', data.usageMetadata.promptTokenCount, data.usageMetadata.candidatesTokenCount);
       return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
   }
