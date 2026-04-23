@@ -779,12 +779,15 @@
     const geminiKey = document.getElementById('key-gemini').value.trim();
     const copilotKey = document.getElementById('key-copilot').value.trim();
 
+    const mainFileData = pastedImages.main ? { ...pastedImages.main } : null;
+    clearPasteImage('main');
+
     MODELS.forEach(async ({ id, color }) => {
       lastPrompt[id] = prompt;
       const enabled = document.getElementById(`toggle-${id}`).checked;
       if (!enabled) { setCardDisabled(id); return; }
       setCardLoading(id, color);
-      try { const text = await runSingle(id, prompt); setCardResult(id, text); }
+      try { const text = await runSingle(id, prompt, mainFileData); setCardResult(id, text); }
       catch (err) { setCardError(id, err.message); }
     });
   }
@@ -891,8 +894,9 @@
     const syncAll = document.getElementById('sync-toggle').checked;
 
     // Run expanded AI
-    const fileData = attachedFile ? { ...attachedFile } : null;
+    const fileData = attachedFile ? { ...attachedFile } : (pastedImages.expand ? { ...pastedImages.expand } : null);
     clearFile();
+    clearPasteImage('expand');
 
     try {
       // Add to history manually before runSingle so it's included
