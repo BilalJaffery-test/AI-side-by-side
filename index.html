@@ -118,7 +118,7 @@
     #empty-state p { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: #333; }
 
     /* ── EXPANDED VIEW ── */
-    #expand-view { display: none; flex-direction: column; position: fixed; inset: 0; background: #0e0e11; z-index: 100; animation: slideIn 0.25s ease; }
+    #expand-view { display: none; flex-direction: column; position: fixed; inset: 0; background: #0e0e11; z-index: 100; animation: slideIn 0.25s ease; width: 100%; }
     #expand-view.visible { display: flex; }
 
     #expand-header { padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e1e24; gap: 12px; flex-wrap: wrap; }
@@ -132,8 +132,8 @@
     .sync-label { font-size: 11px; color: #888; white-space: nowrap; }
 
     /* Chat messages */
-    #expand-messages { flex: 1; overflow-y: auto; padding: 20px 28px; display: flex; flex-direction: column; gap: 14px; }
-    .expand-msg { display: flex; flex-direction: column; max-width: 75%; animation: fadeIn 0.2s ease; }
+    #expand-messages { flex: 1; overflow-y: auto; padding: 20px 28px; display: flex; flex-direction: column; gap: 14px; width: 100%; }
+    .expand-msg { display: flex; flex-direction: column; max-width: 60%; animation: fadeIn 0.2s ease; }
     .expand-msg.user { align-self: flex-end; align-items: flex-end; }
     .expand-msg.assistant { align-self: flex-start; }
     .expand-msg-label { font-size: 10px; color: #555; margin-bottom: 4px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -690,7 +690,7 @@
       lastPrompt[expandedId] = fullPrompt;
       const text = await runSingle(expandedId, fullPrompt, fileData);
       document.getElementById('expand-thinking')?.remove();
-      appendExpandMsg('assistant', text);
+      appendExpandMsg('assistant', stripMarkdown(text));
 
       // Sync other AIs in background if toggle is on
       if (syncAll) {
