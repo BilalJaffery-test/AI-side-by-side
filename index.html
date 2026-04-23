@@ -983,6 +983,13 @@
       t = t.replace('\x00TABLE' + i + '\x00', tbl);
     });
 
+
+    // 11. Fix bullets inside table cells — ensure each starts on new line
+    t = t.replace(/<td>([\s\S]*?)<\/td>/g, function(match, inner) {
+      inner = inner.replace(/([^>])\s*([\u2022\-])\s/g, '$1<br>$2 ');
+      return '<td>' + inner + '</td>';
+    });
+
     return t;
   }
 
