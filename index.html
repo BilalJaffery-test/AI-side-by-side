@@ -470,7 +470,7 @@
     if (isOpen) fetchBalances();
   }
 
-  const SYSTEM_PROMPT = 'You are a helpful assistant. Always keep your answers concise and succinct. Avoid unnecessary padding, preamble, or repetition. Get straight to the point.';
+  const SYSTEM_PROMPT = 'You are a helpful assistant. Always keep your answers concise and succinct. Avoid unnecessary padding, preamble, or repetition. Get straight to the point. Use markdown formatting only (headers, bold, tables, bullet points). Never use HTML tags like <br>, <div>, <span> etc in your responses.';
 
   const lastPrompt   = {};
   const histories    = { claude: [], chatgpt: [], gemini: [], copilot: [] };
@@ -920,6 +920,8 @@
   // ── Synthesis ─────────────────────────────────────────────
 
   function renderMarkdown(text) {
+    // 0. Convert any literal HTML line breaks to newlines first
+    text = text.replace(/<br\s*\/?>/gi, '\n');
     // 1. Bold and italic FIRST (before any escaping)
     let t = text
       .replace(/\*\*([^*\n]+?)\*\*/g, '\x01BOLD\x02$1\x01/BOLD\x02')
