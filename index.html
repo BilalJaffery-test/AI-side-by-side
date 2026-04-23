@@ -622,8 +622,8 @@
 
   async function callGemini(messages, apiKey, fileData) {
     const systemTurn = [
-      { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-      { role: 'model', parts: [{ text: 'Understood. I will keep all answers concise and succinct.' }] }
+      { role: 'user', parts: [{ text: SYSTEM_PROMPT + ' When using tables, keep all content inside table cells only — never mix bullet points inside table rows or break out of table format mid-table. Use either a clean table OR bullet points, not both mixed together.' }] },
+      { role: 'model', parts: [{ text: 'Understood. I will keep answers concise, use clean markdown tables without mixing bullet points inside rows, and never break table format mid-way.' }] }
     ];
     const msgs = fileData ? injectFile(messages, fileData, 'gemini') : messages;
     const contents = [...systemTurn, ...msgs.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))];
