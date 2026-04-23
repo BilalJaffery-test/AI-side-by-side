@@ -1162,6 +1162,160 @@
     });
   }
 
+
+    // ── Paste Image Support ───────────────────────────────────
+    const pastedImages = { main: null, expand: null, synthesis: null };
+
+    function onPasteImage(event, context) {
+      const items = event.clipboardData && event.clipboardData.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          event.preventDefault();
+          const file = items[i].getAsFile();
+          const mediaType = items[i].type;
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const dataUrl = e.target.result;
+            const base64 = dataUrl.split(',')[1];
+            pastedImages[context] = { base64: base64, mediaType: mediaType, name: 'pasted-image.png' };
+            const preview = document.getElementById('paste-preview-' + context);
+            const img = document.getElementById('paste-img-' + context);
+            if (preview && img) { img.src = dataUrl; preview.style.display = 'flex'; }
+          };
+          reader.readAsDataURL(file);
+          return;
+        }
+      }
+    }
+
+    function clearPasteImage(context) {
+      pastedImages[context] = null;
+      const preview = document.getElementById('paste-preview-' + context);
+      if (preview) preview.style.display = 'none';
+    }
+
+    // ── Synthesis Expand View ─────────────────────────────────
+    const synthesisHistory = [];
+
+    function openSynthesisExpand() {
+      const msgs = document.getElementById('synthesis-expand-messages');
+      msgs.innerHTML = '';
+      synthesisHistory.length = 0;
+      const synthBody = document.getElementById('synthesis-body');
+      const synthText = synthBody ? synthBody.innerText.trim() : '';
+      if (synthText && synthText !== 'Synthesising responses…') {
+        synthesisHistory.push({ role: 'assistant', content: synthText });
+        appendSynthesisMsg('assistant', synthText);
+      }
+      msgs.scrollTop = msgs.scrollHeight;
+      document.getElementById('home-view').classList.add('hidden');
+      document.getElementById('synthesis-expand-view').classList.add('visible');
+      document.getElementById('synthesis-expand-textarea').focus();
+    }
+
+    function closeSynthesisExpand() {
+      document.getElementById('home-view').classList.remove('hidden');
+      document.getElementById('synthesis-expand-view').classList.remove('visible');
+      clearPasteImage('synthesis');
+    }
+
+    function appendSynthesisMsg(role, content, isThinking) {
+      const msgs = document.getElementById('synthesis-expand-messages');
+      if (isThinking) {
+        const div = document.createElement('div');
+        div.className = 'expand-thinking';
+        div.id = 'synthesis-thinking';
+        div.textContent = 'Thinking…';
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+        return;
+      }
+      const wrap = document.createElement('div');
+      wrap.className = 'expand-msg ' + role;
+      const label = document.createElement('div');
+      label.className = 'expand-msg-label';
+      label.textContent = role === 'user' ? 'You' : '✦ Synthesis · Claude';
+      const bubble = document.createElement('div');
+      bubble.className = 'expand-msg-bubble';
+      if (role === 'assistant') { bubble.innerHTML = renderMarkdown(content); } else { bubble.textContent = content; }
+      wrap.appendChild(label);
+      wrap.appendChild(bubble);
+      if (role === 'assistant') {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'expand-msg-copy';
+        copyBtn.textContent = '⍘';
+        copyBtn.onclick = function() {
+          navigator.clipboard.writeText(content).then(function() {
+            copyBtn.textContent = '✓'; copyBtn.classList.add('copied');
+            setTimeout(function() { copyBtn.textContent = '⍘'; copyBtn.classList.remove('copied'); }, 2000);
+          });
+        };
+        bubble.appendChild(copyBtn);
+      }
+      msgs.appendChild(wrap);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    async function sendSynthesisExpand() {
+      const textarea = document.getElementById('synthesis-expand-textarea');
+      const prompt = textarea.value.trim();
+      const fileData = pastedImages.synthesis;
+      if (!prompt && !fileData) return;
+      const fullPrompt = prompt || '(See attached image)';
+      textarea.value = '';
+      autoResize(textarea);
+      clearPasteImage('synthesis');
+
+      appendSynthesisMsg('user', fullPrompt);
+      appendSynthesisMsg('assistant', '', true);
+      synthesisHistory.push({ role: 'user', content: fullPrompt });
+
+      try {
+        const apiKey = document.getElementById('key-claude').value.trim();
+        if (!apiKey) throw new Error('Claude API key needed. Add it in ⚙ API Keys.');
+
+        const synthContext = (synthesisHistory[0] && synthesisHistory[0].role === 'assistant') ? synthesisHistory[0].content : '';
+        const sysPrompt = SYSTEM_PROMPT + (synthContext ? ' The user has been shown a synthesised AI response: "' + synthContext.slice(0, 400) + '". Answer follow-up questions about it.' : '');
+
+        const apiMsgs = [];
+        for (let i = 1; i < synthesisHistory.length; i++) {
+          const m = synthesisHistory[i];
+          if (m.role === 'user' && fileData && i === synthesisHistory.length - 1) {
+            apiMsgs.push({ role: 'user', content: [
+              { type: 'text', text: m.content },
+              { type: 'image', source: { type: 'base64', media_type: fileData.mediaType, data: fileData.base64 } }
+            ]});
+          } else {
+            apiMsgs.push({ role: m.role, content: m.content });
+          }
+        }
+        if (apiMsgs.length === 0) apiMsgs.push({ role: 'user', content: fullPrompt });
+
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+          body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 2000, system: sysPrompt, messages: apiMsgs })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error && data.error.message ? data.error.message : 'Claude API error');
+        const text = data.content && data.content[0] ? data.content[0].text : '';
+        if (data.usage) addUsage('claude', data.usage.input_tokens, data.usage.output_tokens);
+        synthesisHistory.push({ role: 'assistant', content: text });
+        const thinking = document.getElementById('synthesis-thinking');
+        if (thinking) thinking.remove();
+        appendSynthesisMsg('assistant', text);
+      } catch (err) {
+        const thinking = document.getElementById('synthesis-thinking');
+        if (thinking) thinking.remove();
+        appendSynthesisMsg('assistant', '⚠ ' + err.message);
+      }
+    }
+
+    function onSynthesisExpandKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendSynthesisExpand(); }
+    }
+
   initCards();
 </script>
 </body>
