@@ -627,13 +627,13 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: 'grok-4.1-fast',
+        model: 'grok-3',
         messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...msgs],
         max_tokens: 4000
       })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Grok API error');
+    if (!res.ok) throw new Error(data.error?.message || data.error?.code || JSON.stringify(data.error) || `Grok API error (${res.status})`);
     if (data.usage) addUsage('gemini', data.usage.prompt_tokens, data.usage.completion_tokens);
     return data.choices?.[0]?.message?.content || '';
   }
