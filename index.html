@@ -231,7 +231,7 @@
   <div id="header">
     <div>
       <h1>Side by Side <em>AI</em></h1>
-      <p>Compare Claude, ChatGPT, Grok &amp; o3 in one prompt</p>
+      <p>Compare Claude, ChatGPT, Gemini &amp; o3 in one prompt</p>
     </div>
     <div id="header-right">
       <div class="toggle-group">
@@ -255,8 +255,8 @@
       <input type="password" id="key-openai" placeholder="sk-..." oninput="updateKeyBorder(this,'#10A37F')"/>
     </div>
     <div class="key-field">
-      <label style="color:#9B5DE5">Grok (xAI)</label>
-      <input type="password" id="key-gemini" placeholder="xai-..." oninput="updateKeyBorder(this,'#9B5DE5')"/>
+      <label style="color:#4285F4">Gemini (Google)</label>
+      <input type="password" id="key-gemini" placeholder="AIza..." oninput="updateKeyBorder(this,'#4285F4')"/>
     </div>
     <div class="key-field">
       <label style="color:#00A4EF">o3 (OpenAI key)</label>
@@ -277,7 +277,7 @@
     <div id="usage-pills">
       <div class="usage-pill" id="pill-claude"><span class="pill-dot" style="background:#D97B4F"></span><span class="pill-tokens">Claude</span><span class="pill-cost" id="cost-claude">—</span></div>
       <div class="usage-pill" id="pill-chatgpt"><span class="pill-dot" style="background:#10A37F"></span><span class="pill-tokens">ChatGPT</span><span class="pill-cost" id="cost-chatgpt">—</span></div>
-      <div class="usage-pill" id="pill-gemini"><span class="pill-dot" style="background:#9B5DE5"></span><span class="pill-tokens">Grok</span><span class="pill-cost" id="cost-gemini">—</span></div>
+      <div class="usage-pill" id="pill-gemini"><span class="pill-dot" style="background:#4285F4"></span><span class="pill-tokens">Gemini</span><span class="pill-cost" id="cost-gemini">—</span></div>
       <div class="usage-pill" id="pill-copilot"><span class="pill-dot" style="background:#00A4EF"></span><span class="pill-tokens">o3</span><span class="pill-cost" id="cost-copilot">—</span></div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
@@ -299,9 +299,9 @@
       <div class="balance-card-sub">OpenAI prepaid</div>
     </div>
     <div class="balance-card">
-      <div class="balance-card-name" style="color:#9B5DE5">Grok</div>
+      <div class="balance-card-name" style="color:#4285F4">Gemini</div>
       <div class="balance-card-amount" id="bal-gemini"><span class="balance-card-loading">Click to load</span></div>
-      <div class="balance-card-sub">xAI prepaid</div>
+      <div class="balance-card-sub">Google postpay</div>
     </div>
     <div class="balance-card">
       <div class="balance-card-name" style="color:#00A4EF">o3</div>
@@ -438,7 +438,7 @@
   const MODELS = [
     { id: 'claude',  name: 'Claude',  company: 'Anthropic', color: '#D97B4F' },
     { id: 'chatgpt', name: 'ChatGPT', company: 'OpenAI',    color: '#10A37F' },
-    { id: 'gemini',  name: 'Grok',    company: 'xAI',       color: '#9B5DE5' },
+    { id: 'gemini',  name: 'Gemini',  company: 'Google',    color: '#4285F4' },
     { id: 'copilot', name: 'o3',      company: 'OpenAI',    color: '#00A4EF' },
   ];
 
@@ -446,7 +446,7 @@
   const PRICING = {
     claude:  { input: 3.00,  output: 15.00  }, // $ per 1M tokens (claude-opus-4-5)
     chatgpt: { input: 2.50,  output: 10.00  }, // $ per 1M tokens (gpt-4o)
-    gemini:  { input: 0.20,  output: 0.50   }, // $ per 1M tokens (grok-4.1-fast)
+    gemini:  { input: 1.25,  output: 5.00   }, // $ per 1M tokens (gemini-2.5-pro)
     copilot: { input: 10.00, output: 40.00  }, // $ per 1M tokens (o3)
   };
   const sessionUsage = { claude: { input:0, output:0 }, chatgpt: { input:0, output:0 }, gemini: { input:0, output:0 }, copilot: { input:0, output:0 } };
@@ -675,21 +675,37 @@
   }
 
   async function callGemini(messages, apiKey, fileData) {
-    // Grok uses OpenAI-compatible API
-    const msgs = fileData ? injectFile(messages, fileData, 'openai') : messages;
-    const res = await fetch('https://api.x.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'grok-3',
-        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...msgs],
-        max_tokens: 4000
-      })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || data.error?.code || JSON.stringify(data.error) || `Grok API error (${res.status})`);
-    if (data.usage) addUsage('gemini', data.usage.prompt_tokens, data.usage.completion_tokens);
-    return data.choices?.[0]?.message?.content || '';
+    const systemTurn = [
+      { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+      { role: 'model', parts: [{ text: 'Understood.' }] }
+    ];
+    // Build contents, injecting image into last user turn if present
+    const contents = [...systemTurn, ...messages.map((m, i) => {
+      const isLastUser = m.role === 'user' && i === messages.length - 1;
+      if (isLastUser && fileData && fileData.mediaType.startsWith('image/')) {
+        return { role: 'user', parts: [
+          { text: m.content },
+          { inline_data: { mime_type: fileData.mediaType, data: fileData.base64 } }
+        ]};
+      }
+      return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] };
+    })];
+
+    const maxRetries = 5;
+    const delays = [3000, 6000, 10000, 15000, 20000];
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) });
+      const data = await res.json();
+      const errMsg = data.error?.message || '';
+      if (!res.ok && (errMsg.includes('high demand') || errMsg.includes('overloaded') || res.status === 503 || res.status === 429)) {
+        if (attempt < maxRetries) { await new Promise(r => setTimeout(r, delays[attempt])); continue; }
+        throw new Error('Gemini is experiencing high demand. Please try the Retry button.');
+      }
+      if (!res.ok) throw new Error(errMsg || 'Gemini API error');
+      if (data.usageMetadata) addUsage('gemini', data.usageMetadata.promptTokenCount, data.usageMetadata.candidatesTokenCount);
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
   }
 
     // Inject file into last user message for multimodal APIs
