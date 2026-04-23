@@ -855,7 +855,7 @@
       lastPrompt[expandedId] = fullPrompt;
       const text = await runSingle(expandedId, fullPrompt, fileData);
       document.getElementById('expand-thinking')?.remove();
-      appendExpandMsg('assistant', stripMarkdown(text));
+      appendExpandMsg('assistant', text);
 
       // Sync other AIs in background if toggle is on
       if (syncAll) {
@@ -918,6 +918,69 @@
   }
 
   // ── Synthesis ─────────────────────────────────────────────
+
+  function renderMarkdown(text) {
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Tables
+    const tableRegex = /((?:\|.+\|\n)+)/g;
+    html = html.replace(tableRegex, match => {
+      const rows = match.trim().split('\n');
+      if (rows.length < 2) return match;
+      const isHeader = r => /^\|[-| :]+\|$/.test(r.trim());
+      const separatorIdx = rows.findIndex(isHeader);
+      if (separatorIdx < 1) return match;
+      const headerCells = rows[0].split('|').filter((c,i,a) => i>0 && i<a.length-1).map(c => '<th>' + c.trim() + '</th>').join('');
+      const bodyRows = rows.slice(separatorIdx+1).map(row => {
+        const cells = row.split('|').filter((c,i,a) => i>0 && i<a.length-1).map(c => '<td>' + c.trim() + '</td>').join('');
+        return '<tr>' + cells + '</tr>';
+      }).join('');
+      return '<table><thead><tr>' + headerCells + '</tr></thead><tbody>' + bodyRows + '</tbody></table>\n';
+    });
+
+    // Headings
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+    // Bold / italic
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
+
+    // HR
+    html = html.replace(/^[-*_]{3,}\s*$/gm, '<hr>');
+
+    // Bullet lists
+    html = html.replace(/((?:^[ \t]*[\-\*\+\u2022] .+\n?)+)/gm, function(match) {
+      const items = match.trim().split('\n').map(function(l) {
+        return '<li>' + l.replace(/^[ \t]*[-*+\u2022] /, '').trim() + '</li>';
+      }).join('');
+      return '<ul>' + items + '</ul>\n';
+    });
+
+    // Numbered lists
+    html = html.replace(/((?:^[ \t]*\d+\. .+\n?)+)/gm, function(match) {
+      const items = match.trim().split('\n').map(function(l) {
+        return '<li>' + l.replace(/^[ \t]*\d+\.[ \t]*/, '').trim() + '</li>';
+      }).join('');
+      return '<ol>' + items + '</ol>\n';
+    });
+
+    // Wrap in paragraphs
+    const blocks = html.split(/\n\n+/);
+    html = blocks.map(function(b) {
+      b = b.trim();
+      if (!b) return '';
+      if (/^<(h[1-3]|ul|ol|table|hr|tr|thead|tbody)/.test(b)) return b;
+      return '<p>' + b.replace(/\n/g, '<br>') + '</p>';
+    }).join('\n');
+
+    return html;
+  }
+
   function stripMarkdown(text) {
     return text
       .replace(/^#{1,6}\s+/gm, '')
@@ -964,7 +1027,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || 'Claude API error');
       dot.className = 'done';
-      body.textContent = stripMarkdown(data.content?.[0]?.text || '');
+      body.innerHTML = renderMarkdown(data.content?.[0]?.text || '');
     } catch (err) {
       dot.className = '';
       body.style.color = '#ff8a8a';
