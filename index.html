@@ -641,7 +641,8 @@
       }
       if (!res.ok) throw new Error(errMsg || 'Gemini API error');
       if (data.usageMetadata) addUsage('gemini', data.usageMetadata.promptTokenCount, data.usageMetadata.candidatesTokenCount);
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      return cleanGeminiResponse(rawText);
     }
   }
 
@@ -918,6 +919,30 @@
   }
 
   // ── Synthesis ─────────────────────────────────────────────
+
+  function cleanGeminiResponse(text) {
+    // Detect if Gemini has mixed table rows with bullet points outside the table
+    // Signs: lines starting with | mixed with lines starting with bullet points
+    const lines = text.split('\n');
+    const hasTableLines = lines.some(l => l.trim().startsWith('|'));
+    const hasBulletsOutsideTable = lines.some(l => /^\s*[-*+•]/.test(l));
+    const hasMixedFormat = hasTableLines && hasBulletsOutsideTable;
+
+    if (!hasMixedFormat) return text;
+
+    // Try to detect if the table is incomplete/broken (fewer than 3 proper table rows)
+    const tableLines = lines.filter(l => l.trim().startsWith('|') && !/^\s*\|[-| :]+\|?\s*$/.test(l));
+    if (tableLines.length >= 3) return text; // Table looks complete enough, leave it
+
+    // Otherwise strip the broken table structure and return just the content as plain text
+    return lines.map(l => {
+      // Convert partial table rows to plain text
+      if (l.trim().startsWith('|') && !/^\s*\|[-| :]+\|?\s*$/.test(l)) {
+        return l.replace(/\|/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+      return l;
+    }).join('\n');
+  }
 
   function renderMarkdown(text) {
     // 0. Convert any literal HTML line breaks to newlines first
