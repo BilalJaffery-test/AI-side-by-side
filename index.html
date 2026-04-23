@@ -155,7 +155,70 @@
     .balance-card-sub { font-size: 11px; color: #555; margin-top: 2px; }
     .balance-card-loading { font-size: 12px; color: #444; font-style: italic; }
 
-    /* ── SYNTHESIS EXPAND VIEW ── */
+    /* ── FACE-OFF VIEW ── */
+    #faceoff-view { display: none; flex-direction: column; position: fixed; inset: 0; background: #0e0e11; z-index: 100; animation: slideIn 0.25s ease; }
+    #faceoff-view.visible { display: flex; }
+    #faceoff-header { padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e1e24; gap: 12px; flex-wrap: wrap; background: #0e0e11; }
+    #faceoff-back { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; color: #fff; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    #faceoff-back:hover { background: rgba(255,255,255,0.2); }
+    #faceoff-title { font-family: 'Instrument Serif', serif; font-size: 20px; color: #fff; }
+    #faceoff-title span { color: #D97B4F; }
+
+    /* Setup panel */
+    #faceoff-setup { padding: 28px; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; flex: 1; }
+    #faceoff-setup h2 { font-family: 'Instrument Serif', serif; font-size: 22px; color: #f0f0f0; text-align: center; }
+    #faceoff-setup p { font-size: 13px; color: #555; text-align: center; max-width: 500px; }
+    .faceoff-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .faceoff-ai-select { background: #13131a; border: 1.5px solid #2a2a30; border-radius: 12px; padding: 10px 18px; color: #e8e8e8; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; min-width: 140px; appearance: none; text-align: center; }
+    .faceoff-ai-select:focus { outline: none; border-color: #D97B4F; }
+    .faceoff-vs { font-family: 'Instrument Serif', serif; font-size: 22px; color: #D97B4F; font-style: italic; }
+    .faceoff-rounds-row { display: flex; gap: 10px; align-items: center; }
+    .faceoff-round-btn { background: #13131a; border: 1.5px solid #2a2a30; border-radius: 8px; padding: 7px 18px; color: #888; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+    .faceoff-round-btn.active { background: #2a1a0e; border-color: #D97B4F; color: #D97B4F; }
+    #faceoff-custom-rounds { background: #13131a; border: 1.5px solid #2a2a30; border-radius: 8px; padding: 7px 12px; color: #e8e8e8; font-size: 13px; font-family: 'DM Sans', sans-serif; width: 70px; text-align: center; display: none; }
+    #faceoff-custom-rounds:focus { outline: none; border-color: #D97B4F; }
+    #faceoff-prompt-input { background: #13131a; border: 1.5px solid #2a2a30; border-radius: 12px; padding: 12px 16px; color: #e8e8e8; font-size: 14px; font-family: 'DM Sans', sans-serif; width: 100%; max-width: 600px; min-height: 80px; resize: vertical; line-height: 1.6; }
+    #faceoff-prompt-input:focus { outline: none; border-color: #3a3a44; }
+    #faceoff-prompt-input::placeholder { color: #444; }
+    #faceoff-start-btn { background: linear-gradient(135deg, #D97B4F, #c4623a); border: none; border-radius: 10px; padding: 11px 32px; color: #fff; font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.2s; }
+    #faceoff-start-btn:hover { opacity: 0.88; }
+
+    /* Arena */
+    #faceoff-arena { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    #faceoff-arena.visible { display: flex; }
+    #faceoff-columns { display: flex; flex: 1; gap: 0; overflow: hidden; }
+    .faceoff-col { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #1e1e24; overflow: hidden; }
+    .faceoff-col:last-child { border-right: none; }
+    .faceoff-col-header { padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #1e1e24; flex-shrink: 0; }
+    .faceoff-col-name { font-family: 'Instrument Serif', serif; font-size: 16px; color: #fff; font-weight: 600; }
+    .faceoff-col-label { font-size: 10px; font-family: monospace; color: #ffffff88; }
+    .faceoff-col-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .faceoff-col-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+    .faceoff-msg { background: #18181b; border: 1px solid #2a2a30; border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.65; color: #e8e8e8; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; animation: fadeIn 0.3s ease; }
+    .faceoff-msg-label { font-size: 10px; font-family: monospace; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .faceoff-msg.loading { color: #555; font-style: italic; }
+
+    /* Judge panel */
+    #faceoff-judge { border-top: 1px solid #1e1e24; background: #0a0a0d; padding: 12px 20px; flex-shrink: 0; max-height: 220px; overflow-y: auto; }
+    #faceoff-judge-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    #faceoff-judge-dot { width: 7px; height: 7px; border-radius: 50%; background: #9B5DE5; flex-shrink: 0; }
+    #faceoff-judge-dot.loading { animation: pulse 1s infinite; box-shadow: 0 0 8px #9B5DE5; }
+    #faceoff-judge-title { font-size: 12px; font-family: monospace; color: #9B5DE5; letter-spacing: 0.05em; }
+    #faceoff-judge-text { font-size: 13px; color: #aaa; line-height: 1.6; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; }
+    #faceoff-convergence { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    #faceoff-convergence-bar-wrap { flex: 1; background: #1e1e24; border-radius: 4px; height: 5px; overflow: hidden; }
+    #faceoff-convergence-bar { height: 100%; background: linear-gradient(90deg, #D97B4F, #d4f5a0); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
+    #faceoff-convergence-label { font-size: 11px; font-family: monospace; color: #555; white-space: nowrap; }
+    #faceoff-round-indicator { font-size: 11px; font-family: monospace; color: #444; margin-left: auto; }
+
+    /* Final verdict */
+    #faceoff-verdict { display: none; margin: 0 20px 16px; background: #18181b; border: 1.5px solid #D97B4F55; border-radius: 14px; overflow: hidden; }
+    #faceoff-verdict.visible { display: block; animation: fadeIn 0.4s ease; }
+    #faceoff-verdict-header { padding: 10px 16px; background: linear-gradient(135deg, #D97B4F, #c4623a); display: flex; align-items: center; justify-content: space-between; }
+    #faceoff-verdict-title { font-family: 'Instrument Serif', serif; font-size: 15px; color: #fff; }
+    #faceoff-verdict-body { padding: 14px 16px; font-size: 13px; line-height: 1.7; color: #e8e8e8; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+
+    /* ── SYNTHESIS EXPAND VIEW ── */    /* ── SYNTHESIS EXPAND VIEW ── */
     #synthesis-expand-view { display: none; flex-direction: column; position: fixed; inset: 0; background: #0e0e11; z-index: 100; animation: slideIn 0.25s ease; width: 100%; }
     #synthesis-expand-view.visible { display: flex; }
     #synthesis-expand-header { padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #D97B4F44; gap: 12px; background: linear-gradient(135deg, #1a0e08, #0e0e11); }
@@ -241,6 +304,7 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
+      <button id="faceoff-btn" onclick="openFaceoff()" style="background:transparent;border:1px solid #2a2a30;border-radius:8px;padding:6px 12px;color:#aaa;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;white-space:nowrap;">⚔ Face-off</button>
       <button id="settings-btn" onclick="toggleSettings()">⚙ API Keys</button>
     </div>
   </div>
@@ -261,6 +325,10 @@
     <div class="key-field">
       <label style="color:#00A4EF">o3 (OpenAI key)</label>
       <input type="password" id="key-copilot" placeholder="sk-..." oninput="updateKeyBorder(this,'#00A4EF')"/>
+    </div>
+    <div class="key-field">
+      <label style="color:#9B5DE5">Grok (xAI · Judge)</label>
+      <input type="password" id="key-grok-judge" placeholder="xai-..." oninput="updateKeyBorder(this,'#9B5DE5')"/>
     </div>
     <div class="key-note">
       <p>Keys stay in your browser only.<br/>Never stored — session memory only.</p>
@@ -356,6 +424,96 @@
   <div id="empty-state">
     <div class="icons">🤖🤖🤖🤖</div>
     <p>Enter a prompt above to compare responses</p>
+  </div>
+</div>
+
+<!-- ══ FACE-OFF VIEW ═══════════════════════════════════════ -->
+<div id="faceoff-view">
+  <div id="faceoff-header">
+    <button id="faceoff-back" onclick="closeFaceoff()">← Back</button>
+    <div id="faceoff-title">⚔ AI <span>Face-off</span></div>
+    <div id="faceoff-round-indicator" style="font-size:11px;font-family:monospace;color:#444;"></div>
+  </div>
+
+  <!-- Setup screen -->
+  <div id="faceoff-setup">
+    <h2>Choose your combatants</h2>
+    <p>Two AIs debate your prompt, Grok judges convergence after each round and delivers a final balanced verdict.</p>
+    <div class="faceoff-row">
+      <select id="faceoff-ai1" class="faceoff-ai-select">
+        <option value="claude">Claude</option>
+        <option value="chatgpt">ChatGPT</option>
+        <option value="gemini">Gemini</option>
+        <option value="copilot">o3</option>
+      </select>
+      <span class="faceoff-vs">vs</span>
+      <select id="faceoff-ai2" class="faceoff-ai-select">
+        <option value="chatgpt">ChatGPT</option>
+        <option value="claude">Claude</option>
+        <option value="gemini">Gemini</option>
+        <option value="copilot">o3</option>
+      </select>
+    </div>
+    <div>
+      <div style="font-size:12px;color:#555;margin-bottom:8px;text-align:center;">Number of rounds</div>
+      <div class="faceoff-rounds-row">
+        <button class="faceoff-round-btn active" onclick="setRounds(3,this)">3</button>
+        <button class="faceoff-round-btn" onclick="setRounds(5,this)">5</button>
+        <button class="faceoff-round-btn" onclick="setRounds('custom',this)">Custom</button>
+        <input type="number" id="faceoff-custom-rounds" min="2" max="10" value="4" placeholder="4"/>
+      </div>
+    </div>
+    <textarea id="faceoff-prompt-input" placeholder='Enter your debate topic… e.g. "What is the best approach to building muscle?"'></textarea>
+    <button id="faceoff-start-btn" onclick="startFaceoff()">⚔ Start Face-off →</button>
+  </div>
+
+  <!-- Arena -->
+  <div id="faceoff-arena">
+    <div id="faceoff-columns">
+      <div class="faceoff-col" id="faceoff-col-1">
+        <div class="faceoff-col-header">
+          <div class="faceoff-col-dot" id="faceoff-dot-1"></div>
+          <div>
+            <div class="faceoff-col-name" id="faceoff-name-1">AI #1</div>
+            <div class="faceoff-col-label">ALPHA</div>
+          </div>
+        </div>
+        <div class="faceoff-col-messages" id="faceoff-msgs-1"></div>
+      </div>
+      <div class="faceoff-col" id="faceoff-col-2">
+        <div class="faceoff-col-header">
+          <div class="faceoff-col-dot" id="faceoff-dot-2"></div>
+          <div>
+            <div class="faceoff-col-name" id="faceoff-name-2">AI #2</div>
+            <div class="faceoff-col-label">BETA</div>
+          </div>
+        </div>
+        <div class="faceoff-col-messages" id="faceoff-msgs-2"></div>
+      </div>
+    </div>
+
+    <!-- Verdict card (shown when done) -->
+    <div id="faceoff-verdict">
+      <div id="faceoff-verdict-header">
+        <div id="faceoff-verdict-title">⚖ Grok's Final Verdict</div>
+        <button onclick="copyFaceoffVerdict()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:3px 9px;color:#fff;font-size:11px;cursor:pointer;">⎘ Copy</button>
+      </div>
+      <div id="faceoff-verdict-body"></div>
+    </div>
+
+    <!-- Judge panel -->
+    <div id="faceoff-judge">
+      <div id="faceoff-judge-header">
+        <div id="faceoff-judge-dot"></div>
+        <div id="faceoff-judge-title">⚖ GROK · JUDGE</div>
+        <div id="faceoff-round-badge" style="font-size:10px;font-family:monospace;color:#444;margin-left:auto;"></div>
+      </div>
+      <div id="faceoff-judge-text">Waiting to begin…</div>
+      <div id="faceoff-convergence">
+        <div id="faceoff-convergence-bar-wrap"><div id="faceoff-convergence-bar"></div></div>
+        <div id="faceoff-convergence-label">Convergence: 0%</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1334,6 +1492,230 @@
 
     function onSynthesisExpandKey(e) {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendSynthesisExpand(); }
+    }
+
+
+    // ══ FACE-OFF ══════════════════════════════════════════════
+    let faceoffRounds = 3;
+    let faceoffRunning = false;
+
+    const FACEOFF_MODEL_INFO = {
+      claude:  { name: 'Claude',  color: '#D97B4F' },
+      chatgpt: { name: 'ChatGPT', color: '#10A37F' },
+      gemini:  { name: 'Gemini',  color: '#4285F4' },
+      copilot: { name: 'o3',      color: '#00A4EF' },
+    };
+
+    function openFaceoff() {
+      document.getElementById('home-view').classList.add('hidden');
+      document.getElementById('faceoff-view').classList.add('visible');
+      document.getElementById('faceoff-setup').style.display = 'flex';
+      document.getElementById('faceoff-arena').classList.remove('visible');
+    }
+
+    function closeFaceoff() {
+      faceoffRunning = false;
+      document.getElementById('home-view').classList.remove('hidden');
+      document.getElementById('faceoff-view').classList.remove('visible');
+    }
+
+    function setRounds(n, btn) {
+      document.querySelectorAll('.faceoff-round-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const customInput = document.getElementById('faceoff-custom-rounds');
+      if (n === 'custom') {
+        customInput.style.display = 'block';
+        faceoffRounds = parseInt(customInput.value) || 4;
+        customInput.oninput = function() { faceoffRounds = Math.min(10, Math.max(2, parseInt(customInput.value) || 2)); };
+      } else {
+        customInput.style.display = 'none';
+        faceoffRounds = n;
+      }
+    }
+
+    async function callFaceoffAI(id, messages) {
+      const openaiKey  = document.getElementById('key-openai').value.trim();
+      const geminiKey  = document.getElementById('key-gemini').value.trim();
+      const copilotKey = document.getElementById('key-copilot').value.trim();
+      if (id === 'claude') return await callClaude(messages, null);
+      if (id === 'chatgpt') return await callOpenAI(messages, openaiKey, 'gpt-4o', null);
+      if (id === 'gemini') return await callGemini(messages, geminiKey, null);
+      if (id === 'copilot') return await callOpenAI(messages, copilotKey, 'o3', null);
+    }
+
+    async function callGrokJudge(prompt) {
+      const grokKey = document.getElementById('key-grok-judge').value.trim();
+      if (!grokKey) throw new Error('Grok API key needed for judging. Add it in API Keys.');
+      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + grokKey },
+        body: JSON.stringify({ model: 'grok-3', messages: [{ role: 'user', content: prompt }], max_tokens: 600 })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error((data.error && data.error.message) || 'Grok judge error');
+      return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+    }
+
+    function appendFaceoffMsg(col, roundNum, text, isLoading) {
+      const container = document.getElementById('faceoff-msgs-' + col);
+      const wrap = document.createElement('div');
+      wrap.className = 'faceoff-msg' + (isLoading ? ' loading' : '');
+      wrap.id = 'faceoff-msg-' + col + '-' + roundNum;
+      const label = document.createElement('div');
+      label.className = 'faceoff-msg-label';
+      label.textContent = 'Round ' + roundNum;
+      const body = document.createElement('div');
+      body.innerHTML = isLoading ? 'Thinking…' : renderMarkdown(text);
+      wrap.appendChild(label);
+      wrap.appendChild(body);
+      container.appendChild(wrap);
+      container.scrollTop = container.scrollHeight;
+      return body;
+    }
+
+    function updateFaceoffMsg(col, roundNum, text) {
+      const wrap = document.getElementById('faceoff-msg-' + col + '-' + roundNum);
+      if (wrap) {
+        wrap.classList.remove('loading');
+        wrap.querySelector('div:last-child').innerHTML = renderMarkdown(text);
+        document.getElementById('faceoff-msgs-' + col).scrollTop = 99999;
+      }
+    }
+
+    function setJudgeLoading(loading) {
+      document.getElementById('faceoff-judge-dot').classList.toggle('loading', loading);
+    }
+
+    function updateJudge(text, convergence) {
+      document.getElementById('faceoff-judge-text').textContent = text;
+      document.getElementById('faceoff-convergence-bar').style.width = convergence + '%';
+      document.getElementById('faceoff-convergence-label').textContent = 'Convergence: ' + convergence + '%';
+    }
+
+    async function startFaceoff() {
+      const ai1id = document.getElementById('faceoff-ai1').value;
+      const ai2id = document.getElementById('faceoff-ai2').value;
+      const prompt = document.getElementById('faceoff-prompt-input').value.trim();
+      if (!prompt) { alert('Please enter a debate topic.'); return; }
+      if (ai1id === ai2id) { alert('Please select two different AIs.'); return; }
+      const grokKey = document.getElementById('key-grok-judge').value.trim();
+      if (!grokKey) { alert('Grok API key needed for judging. Add it in API Keys.'); return; }
+
+      const ai1 = FACEOFF_MODEL_INFO[ai1id];
+      const ai2 = FACEOFF_MODEL_INFO[ai2id];
+
+      document.getElementById('faceoff-setup').style.display = 'none';
+      document.getElementById('faceoff-arena').classList.add('visible');
+      document.getElementById('faceoff-verdict').classList.remove('visible');
+      document.getElementById('faceoff-msgs-1').innerHTML = '';
+      document.getElementById('faceoff-msgs-2').innerHTML = '';
+      document.getElementById('faceoff-name-1').textContent = ai1.name;
+      document.getElementById('faceoff-name-2').textContent = ai2.name;
+      document.getElementById('faceoff-dot-1').style.background = ai1.color;
+      document.getElementById('faceoff-dot-2').style.background = ai2.color;
+      document.getElementById('faceoff-col-1').style.borderRight = '1px solid ' + ai1.color + '33';
+      updateJudge('Waiting to begin…', 0);
+
+      faceoffRunning = true;
+      const hist1 = [];
+      const hist2 = [];
+      let lastConvergence = 0;
+
+      const faceoffSysPrompt = 'You are participating in a structured AI debate. Give your best, well-reasoned response. Be concise and direct. Use markdown formatting. After round 1, you will see the other AI response — engage critically: defend strong points, concede weak ones, incorporate genuinely good insights.';
+
+      for (let round = 1; round <= faceoffRounds; round++) {
+        if (!faceoffRunning) break;
+        document.getElementById('faceoff-round-badge').textContent = 'Round ' + round + ' / ' + faceoffRounds;
+
+        let p1, p2;
+        if (round === 1) {
+          p1 = prompt;
+          p2 = prompt;
+        } else {
+          const last1 = hist1[hist1.length - 1].content;
+          const last2 = hist2[hist2.length - 1].content;
+          p1 = prompt + '\n\n---\nThe other AI responded:\n"' + last2 + '"\n\nRefine your position: defend what you believe strongly, concede what you agree with, improve your answer.';
+          p2 = prompt + '\n\n---\nThe other AI responded:\n"' + last1 + '"\n\nRefine your position: defend what you believe strongly, concede what you agree with, improve your answer.';
+        }
+
+        appendFaceoffMsg(1, round, '', true);
+        appendFaceoffMsg(2, round, '', true);
+
+        hist1.push({ role: 'user', content: p1 });
+        hist2.push({ role: 'user', content: p2 });
+
+        const results = await Promise.all([
+          callFaceoffAI(ai1id, [{ role: 'user', content: faceoffSysPrompt + '\n\n' + p1 }]).catch(function(e) { return '\u26a0 ' + e.message; }),
+          callFaceoffAI(ai2id, [{ role: 'user', content: faceoffSysPrompt + '\n\n' + p2 }]).catch(function(e) { return '\u26a0 ' + e.message; }),
+        ]);
+        const r1 = results[0];
+        const r2 = results[1];
+
+        hist1.push({ role: 'assistant', content: r1 });
+        hist2.push({ role: 'assistant', content: r2 });
+        updateFaceoffMsg(1, round, r1);
+        updateFaceoffMsg(2, round, r2);
+
+        setJudgeLoading(true);
+        const judgePrompt = 'You are an impartial judge evaluating two AI responses. Labels: AI Alpha and AI Beta only — no model names.\n\nTopic: "' + prompt + '"\n\nRound ' + round + ' of ' + faceoffRounds + ':\n\nAI Alpha:\n"' + r1 + '"\n\nAI Beta:\n"' + r2 + '"\n\nPrevious convergence: ' + lastConvergence + '%\n\nRespond in this EXACT format:\nCONVERGENCE: [0-100]\nASSESSMENT: [2-3 sentences on agreement/disagreement]\nCONTINUE: [YES or NO]';
+
+        let convergence = lastConvergence;
+        let shouldContinue = true;
+        try {
+          const judgeText = await callGrokJudge(judgePrompt);
+          const convMatch = judgeText.match(/CONVERGENCE:\s*(\d+)/);
+          const assessMatch = judgeText.match(/ASSESSMENT:\s*([\s\S]+?)(?=\nCONTINUE:|$)/);
+          const contMatch = judgeText.match(/CONTINUE:\s*(YES|NO)/i);
+          convergence = convMatch ? parseInt(convMatch[1]) : lastConvergence;
+          const assessment = assessMatch ? assessMatch[1].trim() : judgeText;
+          shouldContinue = contMatch ? contMatch[1].toUpperCase() === 'YES' : true;
+          lastConvergence = convergence;
+          updateJudge(assessment, convergence);
+        } catch(e) {
+          updateJudge('Judge error: ' + e.message, lastConvergence);
+        }
+        setJudgeLoading(false);
+
+        if (!shouldContinue || convergence >= 85) {
+          document.getElementById('faceoff-round-badge').textContent = 'Converged after round ' + round;
+          break;
+        }
+        if (round === faceoffRounds) {
+          document.getElementById('faceoff-round-badge').textContent = 'All ' + faceoffRounds + ' rounds complete';
+        }
+      }
+
+      if (!faceoffRunning) return;
+      setJudgeLoading(true);
+      document.getElementById('faceoff-judge-text').textContent = 'Producing final verdict…';
+
+      const assistantRounds1 = hist1.filter(function(m) { return m.role === 'assistant'; });
+      const assistantRounds2 = hist2.filter(function(m) { return m.role === 'assistant'; });
+      const transcript = assistantRounds1.map(function(m, i) {
+        return 'Round ' + (i+1) + ' Alpha: ' + m.content + '\nRound ' + (i+1) + ' Beta: ' + (assistantRounds2[i] ? assistantRounds2[i].content : '');
+      }).join('\n\n');
+
+      const verdictPrompt = 'You are an impartial judge. Two AIs (AI Alpha and AI Beta) debated the topic below. Produce a final balanced verdict: synthesise the strongest agreed points, note remaining disagreements and evaluate which position is stronger, give a clear actionable final answer.\n\nTopic: "' + prompt + '"\n\nDebate transcript:\n' + transcript + '\n\nWrite the final verdict with markdown formatting. Be authoritative and balanced.';
+
+      try {
+        const verdict = await callGrokJudge(verdictPrompt);
+        document.getElementById('faceoff-verdict-body').innerHTML = renderMarkdown(verdict);
+        document.getElementById('faceoff-verdict').classList.add('visible');
+        updateJudge('Verdict delivered. See above.', lastConvergence);
+      } catch(e) {
+        document.getElementById('faceoff-verdict-body').textContent = '\u26a0 ' + e.message;
+        document.getElementById('faceoff-verdict').classList.add('visible');
+      }
+      setJudgeLoading(false);
+    }
+
+    function copyFaceoffVerdict() {
+      const text = document.getElementById('faceoff-verdict-body').innerText.trim();
+      navigator.clipboard.writeText(text).then(function() {
+        const btn = event.target;
+        btn.textContent = '\u2713 Copied';
+        setTimeout(function() { btn.textContent = '\u2358 Copy'; }, 2000);
+      });
     }
 
   initCards();
