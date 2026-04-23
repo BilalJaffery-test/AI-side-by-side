@@ -1,154 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Side by Side AI</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0e0e11; color: #e8e8e8; font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-
+    body { background: #0e0e11; color: #e8e8e8; font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
     @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 
-    /* Header */
-    #header { padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e1e24; gap: 16px; flex-wrap: wrap; }
-    #header h1 { font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(20px, 3vw, 30px); font-weight: 400; letter-spacing: -0.01em; color: #f0f0f0; }
+    /* ── HOME VIEW ── */
+    #home-view { display: flex; flex-direction: column; flex: 1; }
+    #home-view.hidden { display: none; }
+
+    #header { padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e1e24; gap: 12px; flex-wrap: wrap; }
+    #header h1 { font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(18px, 3vw, 28px); font-weight: 400; letter-spacing: -0.01em; color: #f0f0f0; }
     #header p { margin-top: 3px; color: #555; font-size: 12px; }
-    #header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    #header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-    /* Toggle switch */
-    .toggle-group { display: flex; align-items: center; gap: 8px; background: #13131a; border: 1px solid #2a2a30; border-radius: 8px; padding: 6px 12px; }
+    .toggle-group { display: flex; align-items: center; gap: 7px; background: #13131a; border: 1px solid #2a2a30; border-radius: 8px; padding: 5px 11px; }
     .toggle-label { font-size: 12px; color: #888; white-space: nowrap; }
-    .toggle-switch { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
+    .toggle-switch { position: relative; width: 32px; height: 17px; flex-shrink: 0; }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider { position: absolute; inset: 0; background: #2a2a30; border-radius: 18px; cursor: pointer; transition: background 0.2s; }
-    .toggle-slider:before { content: ''; position: absolute; width: 12px; height: 12px; left: 3px; top: 3px; background: #666; border-radius: 50%; transition: all 0.2s; }
+    .toggle-slider { position: absolute; inset: 0; background: #2a2a30; border-radius: 17px; cursor: pointer; transition: background 0.2s; }
+    .toggle-slider:before { content: ''; position: absolute; width: 11px; height: 11px; left: 3px; top: 3px; background: #666; border-radius: 50%; transition: all 0.2s; }
     .toggle-switch input:checked + .toggle-slider { background: #D97B4F; }
-    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(16px); background: #fff; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(15px); background: #fff; }
 
-    #settings-btn { background: transparent; border: 1px solid #2a2a30; border-radius: 8px; padding: 7px 13px; color: #aaa; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; white-space: nowrap; }
+    #settings-btn { background: transparent; border: 1px solid #2a2a30; border-radius: 8px; padding: 6px 12px; color: #aaa; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; white-space: nowrap; }
     #settings-btn:hover { background: #1e1e24; }
     #settings-btn.active { background: #2a2a30; }
 
-    /* Settings */
-    #settings-panel { display: none; background: #13131a; border-bottom: 1px solid #1e1e24; padding: 18px 32px; flex-wrap: wrap; gap: 16px; }
+    #settings-panel { display: none; background: #13131a; border-bottom: 1px solid #1e1e24; padding: 16px 28px; flex-wrap: wrap; gap: 14px; }
     #settings-panel.open { display: flex; }
-    .key-field { flex: 1 1 180px; min-width: 160px; }
-    .key-field label { display: block; font-size: 11px; margin-bottom: 5px; font-family: monospace; letter-spacing: 0.08em; text-transform: uppercase; }
-    .key-field input { width: 100%; background: #1c1c24; border: 1px solid #2a2a30; border-radius: 8px; padding: 7px 11px; color: #e0e0e0; font-size: 12px; font-family: monospace; transition: border-color 0.2s; }
+    .key-field { flex: 1 1 160px; min-width: 140px; }
+    .key-field label { display: block; font-size: 10px; margin-bottom: 5px; font-family: monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+    .key-field input { width: 100%; background: #1c1c24; border: 1px solid #2a2a30; border-radius: 8px; padding: 7px 10px; color: #e0e0e0; font-size: 12px; font-family: monospace; transition: border-color 0.2s; }
     .key-field input:focus { outline: none; }
-    .key-note { flex: 1 1 180px; min-width: 160px; display: flex; align-items: flex-end; }
+    .key-note { flex: 1 1 160px; min-width: 140px; display: flex; align-items: flex-end; }
     .key-note p { font-size: 11px; color: #444; line-height: 1.5; }
 
-    /* Prompt */
-    #prompt-area { padding: 20px 32px; border-bottom: 1px solid #1e1e24; }
-    #prompt-box { background: #13131a; border: 1px solid #2a2a30; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.2s; }
-    #prompt-box:focus-within { border-color: #3a3a44; }
-    #prompt-input { background: transparent; border: none; padding: 14px 18px 8px; color: #e8e8e8; font-size: 15px; font-family: 'DM Sans', sans-serif; resize: vertical; line-height: 1.6; min-height: 72px; width: 100%; }
-    #prompt-input:focus { outline: none; }
-    #prompt-input::placeholder { color: #444; }
-    #prompt-footer { padding: 7px 14px 9px; display: flex; justify-content: space-between; align-items: center; }
-    #prompt-hint { font-size: 11px; color: #333; }
-    #run-btn { background: #1e1e24; border: none; border-radius: 8px; padding: 8px 20px; color: #444; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; }
-    #run-btn.ready { background: linear-gradient(135deg, #D97B4F, #c4623a); color: #fff; }
-    #run-btn.ready:hover { opacity: 0.9; }
-
-    /* Conversation history bar */
-    #history-bar { display: none; padding: 8px 32px; background: #0e0e11; border-bottom: 1px solid #1e1e24; align-items: center; justify-content: space-between; }
+    #history-bar { display: none; padding: 7px 28px; background: #0e0e11; border-bottom: 1px solid #1e1e24; align-items: center; justify-content: space-between; }
     #history-bar.visible { display: flex; }
     #history-info { font-size: 12px; color: #555; }
     #history-info span { color: #D97B4F; }
-    #clear-history-btn { font-size: 11px; color: #555; background: none; border: 1px solid #2a2a30; border-radius: 6px; padding: 3px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    #clear-history-btn { font-size: 11px; color: #555; background: none; border: 1px solid #2a2a30; border-radius: 6px; padding: 3px 9px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
     #clear-history-btn:hover { color: #aaa; border-color: #444; }
 
-    /* Results */
-    #results { flex: 1; padding: 20px 32px; display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+    #prompt-area { padding: 18px 28px; border-bottom: 1px solid #1e1e24; }
+    #prompt-box { background: #13131a; border: 1px solid #2a2a30; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.2s; }
+    #prompt-box:focus-within { border-color: #3a3a44; }
+    #prompt-input { background: transparent; border: none; padding: 14px 16px 8px; color: #e8e8e8; font-size: 15px; font-family: 'DM Sans', sans-serif; resize: vertical; line-height: 1.6; min-height: 68px; width: 100%; }
+    #prompt-input:focus { outline: none; }
+    #prompt-input::placeholder { color: #444; }
+    #prompt-footer { padding: 7px 12px 9px; display: flex; justify-content: space-between; align-items: center; }
+    #prompt-hint { font-size: 11px; color: #333; }
+    #run-btn { background: #1e1e24; border: none; border-radius: 8px; padding: 8px 18px; color: #444; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; }
+    #run-btn.ready { background: linear-gradient(135deg, #D97B4F, #c4623a); color: #fff; }
 
-    .model-card { flex: 1 1 0; min-width: 200px; background: #18181b; border-radius: 16px; border: 1.5px solid #2a2a30; display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 0.2s, opacity 0.2s; animation: fadeIn 0.3s ease both; }
+    #results { flex: 1; padding: 18px 28px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+
+    .model-card { flex: 1 1 0; min-width: 190px; background: #18181b; border-radius: 16px; border: 1.5px solid #2a2a30; display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 0.2s, opacity 0.2s; animation: fadeIn 0.3s ease both; }
     .model-card.disabled-card { opacity: 0.35; }
-
-    .model-card-header { padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .model-card-header-left { display: flex; align-items: center; gap: 9px; }
+    .model-card-header { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 7px; }
+    .model-card-header-left { display: flex; align-items: center; gap: 8px; }
     .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffffff33; flex-shrink: 0; transition: all 0.3s; }
     .status-dot.loading { background: #fff; box-shadow: 0 0 8px #fff; animation: pulse 1s infinite; }
     .status-dot.done { background: #d4f5a0; }
     .status-dot.error { background: #ff8a8a; }
-
-    .model-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; color: #fff; font-weight: 600; }
+    .model-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 15px; color: #fff; font-weight: 600; }
     .model-company { font-size: 10px; color: #ffffff88; font-family: monospace; letter-spacing: 0.05em; }
-
-    /* Card controls (retry + AI toggle) */
-    .card-controls { display: flex; align-items: center; gap: 6px; }
-    .retry-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 9px; color: #fff; font-size: 11px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
-    .retry-btn:hover { background: rgba(255,255,255,0.28); }
+    .card-controls { display: flex; align-items: center; gap: 5px; }
+    .retry-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 8px; color: #fff; font-size: 11px; font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; }
     .retry-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* AI on/off toggle in card */
-    .ai-toggle { position: relative; width: 30px; height: 16px; flex-shrink: 0; }
+    .expand-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 7px; color: #fff; font-size: 12px; cursor: pointer; line-height: 1; }
+    .expand-btn:hover { background: rgba(255,255,255,0.28); }
+    .ai-toggle { position: relative; width: 28px; height: 15px; flex-shrink: 0; }
     .ai-toggle input { opacity: 0; width: 0; height: 0; }
-    .ai-toggle-slider { position: absolute; inset: 0; background: rgba(0,0,0,0.3); border-radius: 16px; cursor: pointer; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.2); }
-    .ai-toggle-slider:before { content: ''; position: absolute; width: 10px; height: 10px; left: 2px; top: 2px; background: rgba(255,255,255,0.5); border-radius: 50%; transition: all 0.2s; }
+    .ai-toggle-slider { position: absolute; inset: 0; background: rgba(0,0,0,0.3); border-radius: 15px; cursor: pointer; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.2); }
+    .ai-toggle-slider:before { content: ''; position: absolute; width: 9px; height: 9px; left: 2px; top: 2px; background: rgba(255,255,255,0.5); border-radius: 50%; transition: all 0.2s; }
     .ai-toggle input:checked + .ai-toggle-slider { background: rgba(255,255,255,0.25); }
-    .ai-toggle input:checked + .ai-toggle-slider:before { transform: translateX(14px); background: #fff; }
+    .ai-toggle input:checked + .ai-toggle-slider:before { transform: translateX(13px); background: #fff; }
 
-    .model-body { flex: 1; padding: 14px 16px; font-size: 13px; line-height: 1.65; color: #555; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; overflow-y: auto; min-height: 100px; max-height: 60vh; }
+    .model-body-wrap { position: relative; }
+    .model-body { flex: 1; padding: 12px 14px; font-size: 13px; line-height: 1.65; color: #555; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; overflow-y: auto; min-height: 90px; max-height: 55vh; }
     .model-body.has-result { color: #e8e8e8; }
     .model-body.has-error { color: #ff8a8a; }
-    .model-body .thinking { font-style: italic; }
 
-    /* Chat history display */
-    .chat-history { padding: 0 16px 8px; display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid #2a2a30; margin-bottom: 2px; }
-    .chat-msg { font-size: 12px; line-height: 1.5; padding: 6px 10px; border-radius: 8px; }
-    .chat-msg.user { background: #1e1e28; color: #aaa; align-self: flex-end; max-width: 90%; }
-    .chat-msg.assistant { background: #13131a; color: #888; max-width: 90%; }
-    .chat-msg-label { font-size: 10px; opacity: 0.5; margin-bottom: 2px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+    /* Behind badge */
+    .behind-badge { display: inline-block; margin: 4px 14px 8px; font-size: 10px; color: #D97B4F; background: #2a1a0e; border: 1px solid #D97B4F44; border-radius: 10px; padding: 2px 8px; font-family: monospace; }
 
-    #empty-state { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; }
-    #synthesis-card {
-      margin: 0 32px 24px;
-      background: #18181b;
-      border-radius: 16px;
-      border: 1.5px solid #D97B4F55;
-      overflow: hidden;
-      animation: fadeIn 0.4s ease both;
-      display: none;
-    }
-    #synthesis-card.visible { display: block; }
-    #synthesis-header {
-      padding: 12px 18px;
-      background: linear-gradient(135deg, #D97B4F, #c4623a);
-      display: flex; align-items: center; justify-content: space-between;
-    }
+    /* Copy btn */
+    .copy-btn { position: absolute; bottom: 8px; right: 10px; background: none; border: none; cursor: pointer; color: #fff; font-size: 15px; padding: 3px 6px; border-radius: 6px; transition: all 0.15s; opacity: 0.7; }
+    .copy-btn:hover { background: #2a2a30; opacity: 1; }
+    .copy-btn.copied { color: #d4f5a0; opacity: 1; }
+
+    /* Synthesis card */
+    #synthesis-card { margin: 0 28px 20px; background: #18181b; border-radius: 16px; border: 1.5px solid #D97B4F55; overflow: hidden; display: none; }
+    #synthesis-card.visible { display: block; animation: fadeIn 0.4s ease both; }
+    #synthesis-header { padding: 11px 16px; background: linear-gradient(135deg, #D97B4F, #c4623a); display: flex; align-items: center; justify-content: space-between; }
     #synthesis-header-left { display: flex; align-items: center; gap: 10px; }
-    #synthesis-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 17px; color: #fff; font-weight: 600; }
-    #synthesis-subtitle { font-size: 11px; color: #ffffff88; font-family: monospace; letter-spacing: 0.05em; }
+    #synthesis-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 16px; color: #fff; font-weight: 600; }
+    #synthesis-subtitle { font-size: 10px; color: #ffffff88; font-family: monospace; }
     #synthesis-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffffff33; flex-shrink: 0; transition: all 0.3s; }
     #synthesis-dot.loading { background: #fff; box-shadow: 0 0 8px #fff; animation: pulse 1s infinite; }
     #synthesis-dot.done { background: #d4f5a0; }
-    #synthesis-close { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 10px; color: #fff; font-size: 11px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-    #synthesis-close:hover { background: rgba(255,255,255,0.28); }
-    #synthesis-body { padding: 18px 20px; font-size: 14px; line-height: 1.7; color: #e8e8e8; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; max-height: 50vh; overflow-y: auto; }
+    #synthesis-close { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 9px; color: #fff; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    #synthesis-body { padding: 16px 18px; font-size: 14px; line-height: 1.7; color: #e8e8e8; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; max-height: 45vh; overflow-y: auto; }
 
-    .copy-btn {
-      position: absolute; bottom: 10px; right: 12px;
-      background: none; border: none; cursor: pointer;
-      color: #fff; font-size: 15px; padding: 4px 7px;
-      border-radius: 6px; transition: all 0.15s;
-      opacity: 0.7;
-    }
-    .copy-btn:hover { background: #2a2a30; opacity: 1; }
-    .copy-btn.copied { color: #d4f5a0; opacity: 1; }
-    .model-body-wrap { position: relative; }
+    #empty-state { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; }
+    #empty-state .icons { font-size: 34px; margin-bottom: 10px; opacity: 0.15; letter-spacing: 4px; }
+    #empty-state p { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: #333; }
 
-    #empty-state .icons { font-size: 36px; margin-bottom: 10px; opacity: 0.15; letter-spacing: 4px; }
-    #empty-state p { font-family: 'Instrument Serif', serif; font-size: 17px; font-style: italic; color: #333; }
+    /* ── EXPANDED VIEW ── */
+    #expand-view { display: none; flex-direction: column; position: fixed; inset: 0; background: #0e0e11; z-index: 100; animation: slideIn 0.25s ease; }
+    #expand-view.visible { display: flex; }
+
+    #expand-header { padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e1e24; gap: 12px; flex-wrap: wrap; }
+    #expand-back { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; color: #fff; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
+    #expand-back:hover { background: rgba(255,255,255,0.2); }
+    #expand-title-area { display: flex; align-items: center; gap: 10px; }
+    #expand-name { font-family: 'Instrument Serif', Georgia, serif; font-size: 20px; color: #fff; font-weight: 600; }
+    #expand-company { font-size: 11px; color: #ffffff88; font-family: monospace; }
+    #expand-controls { display: flex; align-items: center; gap: 10px; }
+    .sync-toggle-group { display: flex; align-items: center; gap: 7px; background: #13131a; border: 1px solid #2a2a30; border-radius: 8px; padding: 5px 11px; }
+    .sync-label { font-size: 11px; color: #888; white-space: nowrap; }
+
+    /* Chat messages */
+    #expand-messages { flex: 1; overflow-y: auto; padding: 20px 28px; display: flex; flex-direction: column; gap: 14px; }
+    .expand-msg { display: flex; flex-direction: column; max-width: 75%; animation: fadeIn 0.2s ease; }
+    .expand-msg.user { align-self: flex-end; align-items: flex-end; }
+    .expand-msg.assistant { align-self: flex-start; }
+    .expand-msg-label { font-size: 10px; color: #555; margin-bottom: 4px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+    .expand-msg-bubble { padding: 11px 15px; border-radius: 14px; font-size: 14px; line-height: 1.65; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; }
+    .expand-msg.user .expand-msg-bubble { background: #1e2a3a; color: #c8d8e8; border-radius: 14px 14px 4px 14px; }
+    .expand-msg.assistant .expand-msg-bubble { background: #18181b; color: #e8e8e8; border: 1px solid #2a2a30; border-radius: 14px 14px 14px 4px; position: relative; }
+    .expand-msg-copy { position: absolute; bottom: 6px; right: 8px; background: none; border: none; cursor: pointer; color: #fff; font-size: 13px; opacity: 0.6; transition: opacity 0.15s; }
+    .expand-msg-copy:hover { opacity: 1; }
+    .expand-msg-copy.copied { color: #d4f5a0; opacity: 1; }
+    .expand-thinking { font-style: italic; color: #555; font-size: 13px; padding: 10px 0; }
+
+    /* File preview in chat */
+    .file-preview-bubble { background: #13131a; border: 1px solid #2a2a30; border-radius: 10px; padding: 8px 12px; font-size: 12px; color: #888; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .file-preview-bubble .file-icon { font-size: 18px; }
+
+    /* Expand input */
+    #expand-input-area { padding: 14px 22px; border-top: 1px solid #1e1e24; }
+    #expand-input-box { background: #13131a; border: 1px solid #2a2a30; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.2s; }
+    #expand-input-box:focus-within { border-color: #3a3a44; }
+    #expand-input-toolbar { padding: 8px 12px 0; display: flex; align-items: center; gap: 8px; }
+    #attach-btn { background: none; border: 1px solid #2a2a30; border-radius: 6px; padding: 4px 10px; color: #666; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    #attach-btn:hover { color: #aaa; border-color: #444; }
+    #file-input { display: none; }
+    #file-preview { display: none; align-items: center; gap: 8px; padding: 6px 12px; background: #1c1c24; border-radius: 8px; font-size: 12px; color: #888; }
+    #file-preview.has-file { display: flex; }
+    #file-remove { background: none; border: none; color: #555; cursor: pointer; font-size: 14px; padding: 0 2px; }
+    #expand-textarea { background: transparent; border: none; padding: 10px 14px 8px; color: #e8e8e8; font-size: 14px; font-family: 'DM Sans', sans-serif; resize: none; line-height: 1.6; min-height: 48px; max-height: 140px; width: 100%; overflow-y: auto; }
+    #expand-textarea:focus { outline: none; }
+    #expand-textarea::placeholder { color: #444; }
+    #expand-footer { padding: 6px 12px 10px; display: flex; justify-content: flex-end; }
+    #expand-send { background: linear-gradient(135deg, #D97B4F, #c4623a); border: none; border-radius: 8px; padding: 7px 18px; color: #fff; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.2s; }
+    #expand-send:hover { opacity: 0.88; }
   </style>
 </head>
 <body>
+
+<!-- ══ HOME VIEW ══════════════════════════════════════════════ -->
+<div id="home-view">
 
   <div id="header">
     <div>
@@ -189,7 +212,6 @@
     </div>
   </div>
 
-  <!-- Conversation history indicator -->
   <div id="history-bar">
     <div id="history-info">Conversation mode on — <span id="turn-count">0</span> turn(s) in memory</div>
     <button id="clear-history-btn" onclick="clearHistory()">✕ Clear history</button>
@@ -201,7 +223,7 @@
       <div id="prompt-footer">
         <span id="prompt-hint">Ctrl + Enter to run</span>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button id="aggregate-btn" onclick="aggregateResponses()" style="background:#1e1e24;border:none;border-radius:8px;padding:8px 16px;color:#444;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;" disabled>⊕ Synthesise</button>
+          <button id="aggregate-btn" onclick="aggregateResponses()" style="background:#1e1e24;border:none;border-radius:8px;padding:7px 14px;color:#444;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;" disabled>⊕ Synthesise</button>
           <button id="run-btn" onclick="runAll()">Compare →</button>
         </div>
       </div>
@@ -210,21 +232,23 @@
 
   <div id="results"></div>
 
-  <!-- Synthesis card -->
-  <div id="synthesis-card">
-    <div id="synthesis-header">
-      <div id="synthesis-header-left">
-        <div id="synthesis-dot"></div>
-        <div>
-          <div id="synthesis-title">✦ Synthesis</div>
-          <div id="synthesis-subtitle">Aggregated by Claude · Anthropic</div>
+  <div id="results-bottom">
+    <!-- Synthesis card -->
+    <div id="synthesis-card">
+      <div id="synthesis-header">
+        <div id="synthesis-header-left">
+          <div id="synthesis-dot"></div>
+          <div>
+            <div id="synthesis-title">✦ Synthesis</div>
+            <div id="synthesis-subtitle">Aggregated by Claude · Anthropic</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="copy-btn" id="copy-synthesis" onclick="copySynthesis()" title="Copy" style="position:static;opacity:0.8;">⎘</button>
+          <button id="synthesis-close" onclick="closeSynthesis()">✕ Close</button>
         </div>
       </div>
-      <button id="synthesis-close" onclick="closeSynthesis()">✕ Close</button>
-    </div>
-    <div style="position:relative;">
       <div id="synthesis-body"></div>
-      <button class="copy-btn" id="copy-synthesis" onclick="copySynthesis()" title="Copy synthesis">⎘</button>
     </div>
   </div>
 
@@ -232,437 +256,592 @@
     <div class="icons">🤖🤖🤖🤖</div>
     <p>Enter a prompt above to compare responses</p>
   </div>
+</div>
 
-  <script>
-    const MODELS = [
-      { id: "claude",  name: "Claude",  company: "Anthropic", color: "#D97B4F" },
-      { id: "chatgpt", name: "ChatGPT", company: "OpenAI",    color: "#10A37F" },
-      { id: "gemini",  name: "Gemini",  company: "Google",    color: "#4285F4" },
-      { id: "copilot", name: "o3",      company: "OpenAI",    color: "#00A4EF" },
+<!-- ══ EXPANDED VIEW ══════════════════════════════════════════ -->
+<div id="expand-view">
+  <div id="expand-header">
+    <button id="expand-back" onclick="closeExpand()">← Back</button>
+    <div id="expand-title-area">
+      <div id="expand-status-dot" class="status-dot"></div>
+      <div>
+        <div id="expand-name"></div>
+        <div id="expand-company"></div>
+      </div>
+    </div>
+    <div id="expand-controls">
+      <div class="sync-toggle-group">
+        <span class="sync-label">🔗 Sync all AIs</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="sync-toggle"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div id="expand-messages"></div>
+
+  <div id="expand-input-area">
+    <div id="expand-input-box">
+      <div id="expand-input-toolbar">
+        <button id="attach-btn" onclick="document.getElementById('file-input').click()">📎 Attach file</button>
+        <input type="file" id="file-input" accept="image/*,.pdf" onchange="onFileSelected(event)"/>
+        <div id="file-preview">
+          <span id="file-name"></span>
+          <button id="file-remove" onclick="clearFile()">✕</button>
+        </div>
+      </div>
+      <textarea id="expand-textarea" placeholder="Ask a follow-up…" onkeydown="onExpandKey(event)" oninput="autoResize(this)"></textarea>
+      <div id="expand-footer">
+        <button id="expand-send" onclick="sendExpand()">Send →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Constants & State ─────────────────────────────────────
+  const MODELS = [
+    { id: 'claude',  name: 'Claude',  company: 'Anthropic', color: '#D97B4F' },
+    { id: 'chatgpt', name: 'ChatGPT', company: 'OpenAI',    color: '#10A37F' },
+    { id: 'gemini',  name: 'Gemini',  company: 'Google',    color: '#4285F4' },
+    { id: 'copilot', name: 'o3',      company: 'OpenAI',    color: '#00A4EF' },
+  ];
+
+  const SYSTEM_PROMPT = 'You are a helpful assistant. Always keep your answers concise and succinct. Avoid unnecessary padding, preamble, or repetition. Get straight to the point.';
+
+  const lastPrompt   = {};
+  const histories    = { claude: [], chatgpt: [], gemini: [], copilot: [] };
+  let conversationMode = false;
+  let expandedId     = null;       // which AI is expanded
+  let attachedFile   = null;       // { base64, mediaType, name }
+  let behindTurns    = { claude: 0, chatgpt: 0, gemini: 0, copilot: 0 };
+
+  // ── Card Init ─────────────────────────────────────────────
+  function initCards() {
+    const container = document.getElementById('results');
+    MODELS.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'model-card';
+      card.id = `card-${m.id}`;
+      card.innerHTML = `
+        <div class="model-card-header" style="background:${m.color}">
+          <div class="model-card-header-left">
+            <div class="status-dot" id="dot-${m.id}"></div>
+            <div>
+              <div class="model-name">${m.name}</div>
+              <div class="model-company">${m.company}</div>
+            </div>
+          </div>
+          <div class="card-controls">
+            <button class="retry-btn" id="retry-${m.id}" onclick="retryCard('${m.id}')" disabled>↺ Retry</button>
+            <button class="expand-btn" onclick="openExpand('${m.id}')" title="Expand">⤢</button>
+            <label class="ai-toggle" title="Enable/disable ${m.name}">
+              <input type="checkbox" id="toggle-${m.id}" checked onchange="onAIToggle('${m.id}')"/>
+              <span class="ai-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="model-body-wrap">
+          <div class="model-body" id="body-${m.id}"><span style="color:#444">Response will appear here</span></div>
+          <button class="copy-btn" id="copy-${m.id}" onclick="copyResponse('${m.id}')" title="Copy">⎘</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // ── Home UI Helpers ───────────────────────────────────────
+  function toggleSettings() {
+    document.getElementById('settings-panel').classList.toggle('open');
+    document.getElementById('settings-btn').classList.toggle('active');
+  }
+  function updateKeyBorder(input, color) { input.style.borderColor = input.value ? color : '#2a2a30'; }
+  function onPromptInput() {
+    document.getElementById('run-btn').classList.toggle('ready', document.getElementById('prompt-input').value.trim().length > 0);
+  }
+  function onPromptKey(e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) runAll(); }
+
+  function onConvoToggle() {
+    conversationMode = document.getElementById('convo-toggle').checked;
+    document.getElementById('history-bar').classList.toggle('visible', conversationMode);
+    if (!conversationMode) clearHistory();
+  }
+  function clearHistory() {
+    MODELS.forEach(m => { histories[m.id] = []; behindTurns[m.id] = 0; });
+    updateTurnCount();
+    document.querySelectorAll('.behind-badge').forEach(b => b.remove());
+  }
+  function updateTurnCount() {
+    const turns = Math.max(0, ...MODELS.map(m => Math.floor(histories[m.id].length / 2)));
+    document.getElementById('turn-count').textContent = turns;
+  }
+
+  // ── Card State Setters ────────────────────────────────────
+  function setCardLoading(id, color) {
+    document.getElementById(`dot-${id}`).className = 'status-dot loading';
+    const body = document.getElementById(`body-${id}`);
+    body.className = 'model-body';
+    body.innerHTML = `<span style="font-style:italic;color:${color}">Thinking…</span>`;
+    document.getElementById(`card-${id}`).style.boxShadow = `0 0 0 2px ${color}44`;
+    document.getElementById(`retry-${id}`).disabled = true;
+  }
+  function setCardResult(id, text) {
+    document.getElementById(`dot-${id}`).className = 'status-dot done';
+    const body = document.getElementById(`body-${id}`);
+    body.className = 'model-body has-result';
+    body.textContent = text;
+    document.getElementById(`card-${id}`).style.boxShadow = 'none';
+    document.getElementById(`retry-${id}`).disabled = false;
+    updateAggregateBtn();
+    // Clear behind badge
+    behindTurns[id] = 0;
+    const badge = document.getElementById(`behind-${id}`);
+    if (badge) badge.remove();
+  }
+  function setCardError(id, msg) {
+    document.getElementById(`dot-${id}`).className = 'status-dot error';
+    const body = document.getElementById(`body-${id}`);
+    body.className = 'model-body has-error';
+    body.textContent = '⚠ ' + msg;
+    document.getElementById(`card-${id}`).style.boxShadow = 'none';
+    document.getElementById(`retry-${id}`).disabled = false;
+  }
+  function setCardDisabled(id) {
+    document.getElementById(`dot-${id}`).className = 'status-dot';
+    const body = document.getElementById(`body-${id}`);
+    body.className = 'model-body';
+    body.innerHTML = `<span style="color:#333">Disabled — toggle on to include</span>`;
+  }
+  function setBehindBadge(id, n) {
+    behindTurns[id] = n;
+    let badge = document.getElementById(`behind-${id}`);
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'behind-badge';
+      badge.id = `behind-${id}`;
+      const wrap = document.getElementById(`body-${id}`).parentElement;
+      wrap.appendChild(badge);
+    }
+    badge.textContent = `↩ behind ${n} turn${n>1?'s':''}`;
+  }
+
+  // ── API Calls ─────────────────────────────────────────────
+  async function callClaude(messages, fileData) {
+    const apiKey = document.getElementById('key-claude').value.trim();
+    if (!apiKey) throw new Error('No Claude API key. Add it in ⚙ API Keys.');
+    // If file attached, add to last user message
+    const msgs = fileData ? injectFile(messages, fileData, 'claude') : messages;
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 1000, system: SYSTEM_PROMPT, messages: msgs })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Claude API error');
+    return data.content?.[0]?.text || '';
+  }
+
+  async function callOpenAI(messages, apiKey, model = 'gpt-4o', fileData) {
+    const msgs = fileData ? injectFile(messages, fileData, 'openai') : messages;
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ model, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...msgs], ...(model === 'o3' ? { max_completion_tokens: 1000 } : { max_tokens: 1000 }) })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'OpenAI API error');
+    const msg = data.choices?.[0]?.message;
+    return msg?.content || msg?.reasoning_content || '(No response returned)';
+  }
+
+  async function callGemini(messages, apiKey, fileData) {
+    const systemTurn = [
+      { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+      { role: 'model', parts: [{ text: 'Understood. I will keep all answers concise and succinct.' }] }
     ];
+    const msgs = fileData ? injectFile(messages, fileData, 'gemini') : messages;
+    const contents = [...systemTurn, ...msgs.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))];
 
-    // State
-    const lastPrompt = {};
-    const histories = { claude: [], chatgpt: [], gemini: [], copilot: [] };
-    let conversationMode = false;
-    const SYSTEM_PROMPT = 'You are a helpful assistant. Always keep your answers concise and succinct. Avoid unnecessary padding, preamble, or repetition. Get straight to the point.';
-
-    // ── Card init ──────────────────────────────────────────────
-    function initCards() {
-      const container = document.getElementById('results');
-      MODELS.forEach(m => {
-        const card = document.createElement('div');
-        card.className = 'model-card';
-        card.id = `card-${m.id}`;
-        card.innerHTML = `
-          <div class="model-card-header" style="background:${m.color}">
-            <div class="model-card-header-left">
-              <div class="status-dot" id="dot-${m.id}"></div>
-              <div>
-                <div class="model-name">${m.name}</div>
-                <div class="model-company">${m.company}</div>
-              </div>
-            </div>
-            <div class="card-controls">
-              <button class="retry-btn" id="retry-${m.id}" onclick="retryCard('${m.id}')" disabled>↺ Retry</button>
-              <label class="ai-toggle" title="Enable/disable ${m.name}">
-                <input type="checkbox" id="toggle-${m.id}" checked onchange="onAIToggle('${m.id}')"/>
-                <span class="ai-toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-          <div class="model-body-wrap">
-            <div class="model-body" id="body-${m.id}"><span style="color:#444">Response will appear here</span></div>
-            <button class="copy-btn" id="copy-${m.id}" onclick="copyResponse('${m.id}')" title="Copy response">⎘</button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // ── UI helpers ─────────────────────────────────────────────
-    function toggleSettings() {
-      document.getElementById('settings-panel').classList.toggle('open');
-      document.getElementById('settings-btn').classList.toggle('active');
-    }
-
-    function updateKeyBorder(input, color) {
-      input.style.borderColor = input.value ? color : '#2a2a30';
-    }
-
-    function onPromptInput() {
-      const val = document.getElementById('prompt-input').value.trim();
-      document.getElementById('run-btn').classList.toggle('ready', val.length > 0);
-    }
-
-    function onPromptKey(e) {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) runAll();
-    }
-
-    async function onAIToggle(id) {
-      const enabled = document.getElementById(`toggle-${id}`).checked;
-      document.getElementById(`card-${id}`).classList.toggle('disabled-card', !enabled);
-
-      if (enabled && lastPrompt[id]) {
-        const model = MODELS.find(m => m.id === id);
-        setCardLoading(id, model.color);
-        try {
-          const text = await runSingle(id, lastPrompt[id]);
-          setCardResult(id, text, lastPrompt[id]);
-        } catch (err) {
-          setCardError(id, err.message);
-        }
+    const maxRetries = 4;
+    const delays = [2000, 4000, 6000, 8000];
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) });
+      const data = await res.json();
+      const errMsg = data.error?.message || '';
+      if (!res.ok && (errMsg.includes('high demand') || errMsg.includes('overloaded') || res.status === 503 || res.status === 429)) {
+        if (attempt < maxRetries) { await new Promise(r => setTimeout(r, delays[attempt])); continue; }
+        throw new Error('Gemini is experiencing high demand. Please try the Retry button.');
       }
+      if (!res.ok) throw new Error(errMsg || 'Gemini API error');
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+  }
 
-      if (!enabled) {
-        setCardDisabled(id);
-        document.getElementById(`retry-${id}`).disabled = true;
+  // Inject file into last user message for multimodal APIs
+  function injectFile(messages, fileData, api) {
+    const msgs = JSON.parse(JSON.stringify(messages)); // deep clone
+    const lastUser = [...msgs].reverse().find(m => m.role === 'user');
+    if (!lastUser) return msgs;
+
+    if (api === 'claude') {
+      lastUser.content = [
+        { type: 'text', text: lastUser.content },
+        { type: fileData.mediaType === 'application/pdf' ? 'document' : 'image',
+          source: { type: 'base64', media_type: fileData.mediaType, data: fileData.base64 } }
+      ];
+    } else if (api === 'openai') {
+      if (fileData.mediaType.startsWith('image/')) {
+        lastUser.content = [
+          { type: 'text', text: lastUser.content },
+          { type: 'image_url', image_url: { url: `data:${fileData.mediaType};base64,${fileData.base64}` } }
+        ];
       }
+      // PDFs not natively supported in OpenAI chat API — skip silently
+    } else if (api === 'gemini') {
+      // Find and update the last user turn in contents — handled differently so return original
+      return msgs;
     }
+    return msgs;
+  }
 
-    function onConvoToggle() {
-      conversationMode = document.getElementById('convo-toggle').checked;
-      document.getElementById('history-bar').classList.toggle('visible', conversationMode);
-      if (!conversationMode) clearHistory();
-    }
+  // ── Run Logic ─────────────────────────────────────────────
+  function buildMessages(id, prompt) {
+    if (!conversationMode) return [{ role: 'user', content: prompt }];
+    return [...histories[id], { role: 'user', content: prompt }];
+  }
 
-    function clearHistory() {
-      MODELS.forEach(m => histories[m.id] = []);
+  async function runSingle(id, prompt, fileData) {
+    const openaiKey  = document.getElementById('key-openai').value.trim();
+    const geminiKey  = document.getElementById('key-gemini').value.trim();
+    const copilotKey = document.getElementById('key-copilot').value.trim();
+    const claudeKey  = document.getElementById('key-claude').value.trim();
+    const keyMap = { claude: claudeKey, chatgpt: openaiKey, gemini: geminiKey, copilot: copilotKey };
+    const key = keyMap[id];
+    if (!key) throw new Error('No API key provided. Click ⚙ API Keys above to add one.');
+
+    const messages = buildMessages(id, prompt);
+    let text;
+    if (id === 'claude')       text = await callClaude(messages, fileData);
+    else if (id === 'chatgpt') text = await callOpenAI(messages, openaiKey, 'gpt-4o', fileData);
+    else if (id === 'gemini')  text = await callGemini(messages, geminiKey, fileData);
+    else if (id === 'copilot') text = await callOpenAI(messages, copilotKey, 'o3', fileData);
+
+    if (conversationMode) {
+      histories[id].push({ role: 'user', content: prompt });
+      histories[id].push({ role: 'assistant', content: text });
       updateTurnCount();
-      // Clear chat history displays
-      MODELS.forEach(m => {
-        const existing = document.getElementById(`history-${m.id}`);
-        if (existing) existing.remove();
-      });
     }
+    return text;
+  }
 
-    function updateTurnCount() {
-      const turns = Math.max(...MODELS.map(m => Math.floor(histories[m.id].length / 2)));
-      document.getElementById('turn-count').textContent = Math.max(0, turns);
+  async function onAIToggle(id) {
+    const enabled = document.getElementById(`toggle-${id}`).checked;
+    document.getElementById(`card-${id}`).classList.toggle('disabled-card', !enabled);
+    if (enabled && lastPrompt[id]) {
+      const model = MODELS.find(m => m.id === id);
+      setCardLoading(id, model.color);
+      try { const text = await runSingle(id, lastPrompt[id]); setCardResult(id, text); }
+      catch (err) { setCardError(id, err.message); }
     }
+    if (!enabled) { setCardDisabled(id); document.getElementById(`retry-${id}`).disabled = true; }
+  }
 
-    // ── Card state setters ─────────────────────────────────────
-    function setCardLoading(id, color) {
-      document.getElementById(`dot-${id}`).className = 'status-dot loading';
+  async function retryCard(id) {
+    if (!lastPrompt[id]) return;
+    const model = MODELS.find(m => m.id === id);
+    if (conversationMode && histories[id].length >= 2) { histories[id].splice(-2); updateTurnCount(); }
+    setCardLoading(id, model.color);
+    try { const text = await runSingle(id, lastPrompt[id]); setCardResult(id, text); }
+    catch (err) { setCardError(id, err.message); }
+  }
+
+  async function runAll() {
+    const prompt = document.getElementById('prompt-input').value.trim();
+    if (!prompt) return;
+    document.getElementById('empty-state').style.display = 'none';
+    const claudeKey = document.getElementById('key-claude').value.trim();
+    const openaiKey = document.getElementById('key-openai').value.trim();
+    const geminiKey = document.getElementById('key-gemini').value.trim();
+    const copilotKey = document.getElementById('key-copilot').value.trim();
+
+    MODELS.forEach(async ({ id, color }) => {
+      lastPrompt[id] = prompt;
+      const enabled = document.getElementById(`toggle-${id}`).checked;
+      if (!enabled) { setCardDisabled(id); return; }
+      setCardLoading(id, color);
+      try { const text = await runSingle(id, prompt); setCardResult(id, text); }
+      catch (err) { setCardError(id, err.message); }
+    });
+  }
+
+  // ── Expand View ───────────────────────────────────────────
+  function openExpand(id) {
+    expandedId = id;
+    const model = MODELS.find(m => m.id === id);
+    document.getElementById('expand-name').textContent = model.name;
+    document.getElementById('expand-name').style.fontFamily = "'Instrument Serif', serif";
+    document.getElementById('expand-name').style.fontSize = '20px';
+    document.getElementById('expand-name').style.color = '#fff';
+    document.getElementById('expand-company').textContent = model.company;
+    document.getElementById('expand-header').style.borderBottomColor = model.color + '55';
+
+    // Render existing history
+    const msgs = document.getElementById('expand-messages');
+    msgs.innerHTML = '';
+    histories[id].forEach(msg => appendExpandMsg(msg.role, msg.content));
+    // If no history, show last card response
+    if (histories[id].length === 0) {
       const body = document.getElementById(`body-${id}`);
-      body.className = 'model-body';
-      body.innerHTML = `<span class="thinking" style="color:${color}">Thinking…</span>`;
-      document.getElementById(`card-${id}`).style.boxShadow = `0 0 0 2px ${color}44`;
-      document.getElementById(`retry-${id}`).disabled = true;
+      if (body.className.includes('has-result')) {
+        appendExpandMsg('assistant', body.textContent.trim());
+      }
+    }
+    msgs.scrollTop = msgs.scrollHeight;
+
+    document.getElementById('home-view').classList.add('hidden');
+    document.getElementById('expand-view').classList.add('visible');
+    document.getElementById('expand-textarea').focus();
+  }
+
+  function closeExpand() {
+    // Update the card with latest history response
+    if (expandedId && histories[expandedId].length > 0) {
+      const last = histories[expandedId][histories[expandedId].length - 1];
+      if (last.role === 'assistant') setCardResult(expandedId, last.content);
+    }
+    document.getElementById('home-view').classList.remove('hidden');
+    document.getElementById('expand-view').classList.remove('visible');
+    clearFile();
+    expandedId = null;
+  }
+
+  function appendExpandMsg(role, content, isThinking) {
+    const msgs = document.getElementById('expand-messages');
+    if (isThinking) {
+      const div = document.createElement('div');
+      div.className = 'expand-thinking';
+      div.id = 'expand-thinking';
+      div.textContent = 'Thinking…';
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+      return;
+    }
+    const wrap = document.createElement('div');
+    wrap.className = `expand-msg ${role}`;
+    const label = document.createElement('div');
+    label.className = 'expand-msg-label';
+    label.textContent = role === 'user' ? 'You' : (MODELS.find(m => m.id === expandedId)?.name || 'AI');
+    const bubble = document.createElement('div');
+    bubble.className = 'expand-msg-bubble';
+    bubble.textContent = content;
+    wrap.appendChild(label);
+    wrap.appendChild(bubble);
+    // Copy button on assistant messages
+    if (role === 'assistant') {
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'expand-msg-copy';
+      copyBtn.textContent = '⎘';
+      copyBtn.onclick = () => {
+        navigator.clipboard.writeText(content).then(() => {
+          copyBtn.textContent = '✓'; copyBtn.classList.add('copied');
+          setTimeout(() => { copyBtn.textContent = '⎘'; copyBtn.classList.remove('copied'); }, 2000);
+        });
+      };
+      bubble.appendChild(copyBtn);
+    }
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  async function sendExpand() {
+    const textarea = document.getElementById('expand-textarea');
+    const prompt = textarea.value.trim();
+    if (!prompt && !attachedFile) return;
+    const fullPrompt = prompt || '(See attached file)';
+    textarea.value = '';
+    autoResize(textarea);
+
+    // Show file preview in chat if attached
+    if (attachedFile) {
+      const msgs = document.getElementById('expand-messages');
+      const fileBubble = document.createElement('div');
+      fileBubble.className = 'expand-msg user';
+      fileBubble.innerHTML = `<div class="file-preview-bubble"><span class="file-icon">${attachedFile.mediaType.startsWith('image/') ? '🖼' : '📄'}</span><span>${attachedFile.name}</span></div>`;
+      msgs.appendChild(fileBubble);
     }
 
-    function setCardResult(id, text, prompt) {
-      document.getElementById(`dot-${id}`).className = 'status-dot done';
-      const card = document.getElementById(`card-${id}`);
-      card.style.boxShadow = 'none';
-      document.getElementById(`retry-${id}`).disabled = false;
-      updateAggregateBtn();
+    appendExpandMsg('user', fullPrompt);
+    appendExpandMsg('assistant', '', true); // thinking indicator
 
-      if (conversationMode && histories[id].length > 2) {
-        // Show history + new response
-        renderCardWithHistory(id, text);
+    const syncAll = document.getElementById('sync-toggle').checked;
+
+    // Run expanded AI
+    const fileData = attachedFile ? { ...attachedFile } : null;
+    clearFile();
+
+    try {
+      // Add to history manually before runSingle so it's included
+      if (conversationMode) {
+        // runSingle will handle history
+      }
+      lastPrompt[expandedId] = fullPrompt;
+      const text = await runSingle(expandedId, fullPrompt, fileData);
+      document.getElementById('expand-thinking')?.remove();
+      appendExpandMsg('assistant', text);
+
+      // Sync other AIs in background if toggle is on
+      if (syncAll) {
+        MODELS.forEach(async ({ id }) => {
+          if (id === expandedId) return;
+          const enabled = document.getElementById(`toggle-${id}`).checked;
+          if (!enabled) return;
+          lastPrompt[id] = fullPrompt;
+          try {
+            const t = await runSingle(id, fullPrompt, null);
+            setCardResult(id, t);
+          } catch(e) {
+            setCardError(id, e.message);
+          }
+        });
       } else {
-        const body = document.getElementById(`body-${id}`);
-        body.className = 'model-body has-result';
-        body.textContent = text;
+        // Mark others as behind
+        MODELS.forEach(({ id }) => {
+          if (id === expandedId) return;
+          if (document.getElementById(`toggle-${id}`).checked) {
+            setBehindBadge(id, (behindTurns[id] || 0) + 1);
+          }
+        });
       }
+    } catch (err) {
+      document.getElementById('expand-thinking')?.remove();
+      appendExpandMsg('assistant', '⚠ ' + err.message);
     }
+  }
 
-    function renderCardWithHistory(id) {
-      const body = document.getElementById(`body-${id}`);
-      body.className = 'model-body has-result';
-      body.innerHTML = '';
+  function onExpandKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendExpand(); }
+  }
 
-      // Show previous turns condensed
-      const hist = histories[id];
-      if (hist.length > 2) {
-        const histDiv = document.createElement('div');
-        histDiv.className = 'chat-history';
-        for (let i = 0; i < hist.length - 2; i++) {
-          const msg = hist[i];
-          const div = document.createElement('div');
-          div.className = `chat-msg ${msg.role}`;
-          const label = document.createElement('div');
-          label.className = 'chat-msg-label';
-          label.textContent = msg.role === 'user' ? 'You' : 'AI';
-          const content = document.createElement('div');
-          const text = msg.content.length > 120 ? msg.content.slice(0, 120) + '…' : msg.content;
-          content.textContent = text;
-          div.appendChild(label);
-          div.appendChild(content);
-          histDiv.appendChild(div);
-        }
-        body.appendChild(histDiv);
-      }
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+  }
 
-      // Latest response
-      const latest = document.createElement('div');
-      latest.style.padding = '8px 0 0';
-      latest.textContent = hist[hist.length - 1]?.content || '';
-      body.appendChild(latest);
-    }
+  // ── File Handling ─────────────────────────────────────────
+  function onFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target.result;
+      const base64 = dataUrl.split(',')[1];
+      attachedFile = { base64, mediaType: file.type, name: file.name };
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-preview').classList.add('has-file');
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  }
 
-    function setCardError(id, msg) {
-      document.getElementById(`dot-${id}`).className = 'status-dot error';
-      const body = document.getElementById(`body-${id}`);
-      body.className = 'model-body has-error';
-      body.textContent = '⚠ ' + msg;
-      document.getElementById(`card-${id}`).style.boxShadow = 'none';
-      document.getElementById(`retry-${id}`).disabled = false;
-    }
+  function clearFile() {
+    attachedFile = null;
+    document.getElementById('file-preview').classList.remove('has-file');
+    document.getElementById('file-name').textContent = '';
+  }
 
-    function setCardDisabled(id) {
-      document.getElementById(`dot-${id}`).className = 'status-dot';
-      const body = document.getElementById(`body-${id}`);
-      body.className = 'model-body';
-      body.innerHTML = `<span style="color:#333">Disabled — toggle on to include</span>`;
-    }
+  // ── Synthesis ─────────────────────────────────────────────
+  function stripMarkdown(text) {
+    return text
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1')
+      .replace(/^[-*_]{3,}\s*$/gm, '──────')
+      .replace(/`{1,3}([^`]+)`{1,3}/g, '$1')
+      .replace(/^\s*[-*+]\s+/gm, '• ')
+      .replace(/^\s*\d+\.\s+/gm, '')
+      .trim();
+  }
 
-    // ── API calls ──────────────────────────────────────────────
-    async function callClaude(messages) {
+  async function aggregateResponses() {
+    const prompt = document.getElementById('prompt-input').value.trim();
+    const responses = [];
+    MODELS.forEach(m => {
+      const body = document.getElementById(`body-${m.id}`);
+      if (!document.getElementById(`toggle-${m.id}`).checked) return;
+      if (body.className.includes('has-result')) responses.push({ name: m.name, text: body.textContent.trim() });
+    });
+    if (responses.length < 2) { alert('Need at least 2 AI responses to synthesise. Run a prompt first.'); return; }
+
+    const card = document.getElementById('synthesis-card');
+    const dot  = document.getElementById('synthesis-dot');
+    const body = document.getElementById('synthesis-body');
+    card.classList.add('visible');
+    dot.className = 'loading';
+    body.textContent = 'Synthesising responses…';
+    body.style.color = '#e8e8e8';
+    document.getElementById('results-bottom').appendChild(card);
+
+    const responseBlock = responses.map(r => `=== ${r.name} ===\n${r.text}`).join('\n\n');
+    const sysPrompt = `You are a neutral synthesis engine. Synthesise the given AI responses into one comprehensive, balanced answer that captures the strongest points, resolves contradictions fairly, and does not favour any single AI. Do not use markdown formatting. Do not mention which AI said what. Be concise.`;
+    const userPrompt = `Original question: "${prompt}"\n\nResponses:\n\n${responseBlock}\n\nPlease synthesise into one balanced answer.`;
+
+    try {
       const apiKey = document.getElementById('key-claude').value.trim();
-      if (!apiKey) throw new Error('No Claude API key provided. Add it in ⚙ API Keys.');
+      if (!apiKey) throw new Error('Claude API key needed for synthesis.');
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 1000, system: SYSTEM_PROMPT, messages })
+        body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 1500, system: sysPrompt, messages: [{ role: 'user', content: userPrompt }] })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || 'Claude API error');
-      return data.content?.[0]?.text || '';
+      dot.className = 'done';
+      body.textContent = stripMarkdown(data.content?.[0]?.text || '');
+    } catch (err) {
+      dot.className = '';
+      body.style.color = '#ff8a8a';
+      body.textContent = '⚠ ' + err.message;
     }
+  }
 
-    async function callOpenAI(messages, apiKey, model = 'gpt-4o') {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages], ...(model === 'o3' ? { max_completion_tokens: 1000 } : { max_tokens: 1000 }) })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'OpenAI API error');
-      const msg = data.choices?.[0]?.message;
-      return msg?.content || msg?.reasoning_content || msg?.refusal || '(No response returned)';
+  function closeSynthesis() { document.getElementById('synthesis-card').classList.remove('visible'); }
+
+  function updateAggregateBtn() {
+    const hasResults = MODELS.some(m => document.getElementById(`body-${m.id}`)?.className.includes('has-result'));
+    const btn = document.getElementById('aggregate-btn');
+    if (hasResults) {
+      btn.disabled = false;
+      btn.style.background = 'linear-gradient(135deg, #2a1a0e, #3a2210)';
+      btn.style.color = '#D97B4F';
+      btn.style.border = '1px solid #D97B4F44';
     }
+  }
 
-    async function callGemini(messages, apiKey) {
-      const systemTurn = [
-        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-        { role: 'model', parts: [{ text: 'Understood. I will keep all answers concise and succinct.' }] }
-      ];
-      const contents = [...systemTurn, ...messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))];
+  // ── Copy ──────────────────────────────────────────────────
+  function copyResponse(id) {
+    const body = document.getElementById(`body-${id}`);
+    if (!body.className.includes('has-result')) return;
+    navigator.clipboard.writeText(body.textContent.trim()).then(() => {
+      const btn = document.getElementById(`copy-${id}`);
+      btn.textContent = '✓'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
 
-      const maxRetries = 4;
-      const delays = [2000, 4000, 6000, 8000];
+  function copySynthesis() {
+    const text = document.getElementById('synthesis-body').textContent.trim();
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copy-synthesis');
+      btn.textContent = '✓'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
 
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) }
-        );
-        const data = await res.json();
-        const errMsg = data.error?.message || '';
-
-        // If high demand error and retries remain, wait and try again
-        if (!res.ok && (errMsg.includes('high demand') || errMsg.includes('overloaded') || res.status === 503 || res.status === 429)) {
-          if (attempt < maxRetries) {
-            await new Promise(r => setTimeout(r, delays[attempt]));
-            continue;
-          }
-          throw new Error('Gemini is experiencing high demand. Please try again in a moment.');
-        }
-
-        if (!res.ok) throw new Error(errMsg || 'Gemini API error');
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      }
-    }
-
-    // ── Run logic ──────────────────────────────────────────────
-    function buildMessages(id, prompt) {
-      if (!conversationMode) return [{ role: 'user', content: prompt }];
-      return [...histories[id], { role: 'user', content: prompt }];
-    }
-
-    async function runSingle(id, prompt) {
-      const openaiKey  = document.getElementById('key-openai').value.trim();
-      const geminiKey  = document.getElementById('key-gemini').value.trim();
-      const copilotKey = document.getElementById('key-copilot').value.trim();
-      const claudeKey  = document.getElementById('key-claude').value.trim();
-
-      const keyMap  = { claude: claudeKey, chatgpt: openaiKey, gemini: geminiKey, copilot: copilotKey };
-      const key = keyMap[id];
-      if (!key) throw new Error('No API key provided. Click ⚙ API Keys above to add one.');
-
-      const messages = buildMessages(id, prompt);
-
-      let text;
-      if (id === 'claude')  text = await callClaude(messages);
-      else if (id === 'chatgpt') text = await callOpenAI(messages, openaiKey);
-      else if (id === 'gemini')  text = await callGemini(messages, geminiKey);
-      else if (id === 'copilot') text = await callOpenAI(messages, copilotKey, 'o3');
-
-      // Save to history if convo mode
-      if (conversationMode) {
-        histories[id].push({ role: 'user', content: prompt });
-        histories[id].push({ role: 'assistant', content: text });
-        updateTurnCount();
-      }
-
-      return text;
-    }
-
-    async function retryCard(id) {
-      if (!lastPrompt[id]) return;
-      const model = MODELS.find(m => m.id === id);
-      setCardLoading(id, model.color);
-      try {
-        // Remove last exchange from history before retrying
-        if (conversationMode && histories[id].length >= 2) {
-          histories[id].splice(-2);
-          updateTurnCount();
-        }
-        const text = await runSingle(id, lastPrompt[id]);
-        setCardResult(id, text, lastPrompt[id]);
-      } catch (err) {
-        setCardError(id, err.message);
-      }
-    }
-
-    async function runAll() {
-      const prompt = document.getElementById('prompt-input').value.trim();
-      if (!prompt) return;
-      document.getElementById('empty-state').style.display = 'none';
-
-      MODELS.forEach(async ({ id, color }) => {
-        lastPrompt[id] = prompt;
-        const enabled = document.getElementById(`toggle-${id}`).checked;
-        if (!enabled) { setCardDisabled(id); return; }
-
-        setCardLoading(id, color);
-        try {
-          const text = await runSingle(id, prompt);
-          setCardResult(id, text, prompt);
-        } catch (err) {
-          setCardError(id, err.message);
-        }
-      });
-    }
-
-    // ── Synthesis ──────────────────────────────────────────────
-    async function aggregateResponses() {
-      const prompt = document.getElementById('prompt-input').value.trim();
-      const responses = [];
-
-      MODELS.forEach(m => {
-        const body = document.getElementById(`body-${m.id}`);
-        const enabled = document.getElementById(`toggle-${m.id}`).checked;
-        if (!enabled) return;
-        const text = body.className.includes('has-result') ? body.textContent.trim() : null;
-        if (text) responses.push({ name: m.name, text });
-      });
-
-      if (responses.length < 2) {
-        alert('Need at least 2 AI responses to synthesise. Run a prompt first.');
-        return;
-      }
-
-      const card = document.getElementById('synthesis-card');
-      const dot = document.getElementById('synthesis-dot');
-      const body = document.getElementById('synthesis-body');
-      card.classList.add('visible');
-      dot.className = 'loading';
-      body.textContent = 'Synthesising responses…';
-
-      const responseBlock = responses.map(r => `=== ${r.name} ===\n${r.text}`).join('\n\n');
-      const systemPrompt = `You are a neutral synthesis engine. You will be given a question and responses to it from multiple AI models. Your task is to synthesise these into one comprehensive, balanced answer that:
-- Captures the strongest points from each response
-- Resolves any contradictions fairly
-- Does not favour any single AI's perspective
-- Is concise but complete
-- Does not mention which AI said what`;
-
-      const userPrompt = `Original question: "${prompt}"\n\nResponses from ${responses.length} AI models:\n\n${responseBlock}\n\nPlease synthesise these into one comprehensive, balanced answer.`;
-
-      try {
-        const apiKey = document.getElementById('key-claude').value.trim();
-        if (!apiKey) throw new Error('Claude API key needed for synthesis. Add it in ⚙ API Keys.');
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-          body: JSON.stringify({
-            model: 'claude-opus-4-5',
-            max_tokens: 1500,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: userPrompt }]
-          })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error?.message || 'Claude API error');
-        const text = data.content?.[0]?.text || '';
-        dot.className = 'done';
-        body.textContent = stripMarkdown(text);
-      } catch (err) {
-        dot.className = '';
-        body.style.color = '#ff8a8a';
-        body.textContent = '⚠ ' + err.message;
-      }
-    }
-
-    function closeSynthesis() {
-      document.getElementById('synthesis-card').classList.remove('visible');
-    }
-
-    function updateAggregateBtn() {
-      const hasResults = MODELS.some(m => {
-        const body = document.getElementById(`body-${m.id}`);
-        return body && body.className.includes('has-result');
-      });
-      const btn = document.getElementById('aggregate-btn');
-      if (hasResults) {
-        btn.disabled = false;
-        btn.style.background = 'linear-gradient(135deg, #2a1a0e, #3a2210)';
-        btn.style.color = '#D97B4F';
-        btn.style.border = '1px solid #D97B4F44';
-      }
-    }
-
-    // ── Copy ──────────────────────────────────────────────────
-    function stripMarkdown(text) {
-      return text
-        .replace(/^#{1,6}\s+/gm, '')           // remove ## headers
-        .replace(/\*\*(.+?)\*\*/g, '$1')        // **bold**
-        .replace(/\*(.+?)\*/g, '$1')            // *italic*
-        .replace(/^[-*_]{3,}\s*$/gm, '──────') // --- dividers
-        .replace(/`{1,3}([^`]+)`{1,3}/g, '$1') // `code`
-        .replace(/^\s*[-*+]\s+/gm, '• ')        // bullet points
-        .replace(/^\s*\d+\.\s+/gm, '')          // numbered lists
-        .trim();
-    }
-
-    function copySynthesis() {
-      const body = document.getElementById('synthesis-body');
-      const text = body.textContent.trim();
-      if (!text) return;
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copy-synthesis');
-        btn.textContent = '✓';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 2000);
-      });
-    }
-
-    function copyResponse(id) {
-      const body = document.getElementById(`body-${id}`);
-      if (!body.className.includes('has-result')) return;
-      const text = body.textContent.trim();
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById(`copy-${id}`);
-        btn.textContent = '✓';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 2000);
-      });
-    }
-
-    initCards();
-  </script>
+  initCards();
+</script>
 </body>
 </html>
