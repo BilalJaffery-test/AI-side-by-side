@@ -1543,13 +1543,13 @@
       if (id === 'copilot') return await callOpenAI(messages, copilotKey, 'o3', null);
     }
 
-    async function callGrokJudge(prompt) {
+    async function callGrokJudge(prompt, maxTokens) {
       const grokKey = document.getElementById('key-grok-judge').value.trim();
       if (!grokKey) throw new Error('Grok API key needed for judging. Add it in API Keys.');
       const res = await fetch('https://api.x.ai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + grokKey },
-        body: JSON.stringify({ model: 'grok-3', messages: [{ role: 'user', content: prompt }], max_tokens: 600 })
+        body: JSON.stringify({ model: 'grok-3', messages: [{ role: 'user', content: prompt }], max_tokens: maxTokens || 600 })
       });
       const data = await res.json();
       if (!res.ok) throw new Error((data.error && data.error.message) || 'Grok judge error');
@@ -1662,7 +1662,7 @@
         let convergence = lastConvergence;
         let shouldContinue = true;
         try {
-          const judgeText = await callGrokJudge(judgePrompt);
+          const judgeText = await callGrokJudge(judgePrompt, 300);
           const convMatch = judgeText.match(/CONVERGENCE:\s*(\d+)/);
           const assessMatch = judgeText.match(/ASSESSMENT:\s*([\s\S]+?)(?=\nCONTINUE:|$)/);
           const contMatch = judgeText.match(/CONTINUE:\s*(YES|NO)/i);
@@ -1695,10 +1695,10 @@
         return 'Round ' + (i+1) + ' Alpha: ' + m.content + '\nRound ' + (i+1) + ' Beta: ' + (assistantRounds2[i] ? assistantRounds2[i].content : '');
       }).join('\n\n');
 
-      const verdictPrompt = 'You are an impartial judge. Two AIs (AI Alpha and AI Beta) debated the topic below. Produce a final balanced verdict: synthesise the strongest agreed points, note remaining disagreements and evaluate which position is stronger, give a clear actionable final answer.\n\nTopic: "' + prompt + '"\n\nDebate transcript:\n' + transcript + '\n\nWrite the final verdict with markdown formatting. Be authoritative and balanced.';
+      const verdictPrompt = 'You are an impartial judge. Two AIs debated the topic below. Write a CONCISE final verdict in 3 short sections:\n\n**Agreed:** What both AIs converged on (2-3 bullet points max)\n**Disputed:** Key remaining disagreements and which position is stronger (1-2 bullets)\n**Verdict:** One clear, actionable final answer (2-3 sentences)\n\nBe tight and decisive. No preamble.\n\nTopic: "' + prompt + '"\n\nTranscript:\n' + transcript;
 
       try {
-        const verdict = await callGrokJudge(verdictPrompt);
+        const verdict = await callGrokJudge(verdictPrompt, 800);
         document.getElementById('faceoff-verdict-body').innerHTML = renderMarkdown(verdict);
         document.getElementById('faceoff-verdict').classList.add('visible');
         updateJudge('Verdict delivered. See above.', lastConvergence);
