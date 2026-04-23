@@ -470,7 +470,7 @@
     if (isOpen) fetchBalances();
   }
 
-  const SYSTEM_PROMPT = 'You are a helpful assistant. Always keep your answers concise and succinct. Avoid unnecessary padding, preamble, or repetition. Get straight to the point. Use markdown formatting only (headers, bold, tables, bullet points). Never use HTML tags like <br>, <div>, <span> etc in your responses.';
+  const SYSTEM_PROMPT = 'You are a helpful assistant. Always keep your answers concise and succinct. Avoid unnecessary padding, preamble, or repetition. Get straight to the point. Use markdown formatting only (headers, bold, tables, bullet points). Never use HTML tags like <br>, <div>, <span> etc in your responses. When using markdown tables, keep ALL content inside table cells on a single line — never add bullet points or line breaks outside of table rows. If content is too complex for a table, use bullet points instead of a table.';
 
   const lastPrompt   = {};
   const histories    = { claude: [], chatgpt: [], gemini: [], copilot: [] };
