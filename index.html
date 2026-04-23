@@ -88,6 +88,25 @@
     .ai-toggle input:checked + .ai-toggle-slider:before { transform: translateX(13px); background: #fff; }
 
     .model-body-wrap { position: relative; }
+    /* Markdown rendering styles */
+    .model-body h1, .model-body h2, .model-body h3,
+    .expand-msg-bubble h1, .expand-msg-bubble h2, .expand-msg-bubble h3,
+    #synthesis-body h1, #synthesis-body h2, #synthesis-body h3 {
+      font-family: 'Instrument Serif', Georgia, serif; font-weight: 600; color: #f0f0f0; margin: 12px 0 6px;
+    }
+    .model-body h1, .expand-msg-bubble h1, #synthesis-body h1 { font-size: 16px; }
+    .model-body h2, .expand-msg-bubble h2, #synthesis-body h2 { font-size: 14px; }
+    .model-body h3, .expand-msg-bubble h3, #synthesis-body h3 { font-size: 13px; }
+    .model-body p, .expand-msg-bubble p, #synthesis-body p { margin: 6px 0; }
+    .model-body ul, .model-body ol, .expand-msg-bubble ul, .expand-msg-bubble ol, #synthesis-body ul, #synthesis-body ol { margin: 6px 0 6px 18px; }
+    .model-body li, .expand-msg-bubble li, #synthesis-body li { margin: 3px 0; line-height: 1.5; }
+    .model-body strong, .expand-msg-bubble strong, #synthesis-body strong { color: #f0f0f0; font-weight: 600; }
+    .model-body em, .expand-msg-bubble em, #synthesis-body em { color: #ccc; font-style: italic; }
+    .model-body hr, .expand-msg-bubble hr, #synthesis-body hr { border: none; border-top: 1px solid #2a2a30; margin: 10px 0; }
+    .model-body table, .expand-msg-bubble table, #synthesis-body table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 12px; }
+    .model-body th, .expand-msg-bubble th, #synthesis-body th { background: #1e1e28; color: #D97B4F; padding: 7px 10px; text-align: left; border: 1px solid #2a2a30; font-weight: 600; }
+    .model-body td, .expand-msg-bubble td, #synthesis-body td { padding: 6px 10px; border: 1px solid #2a2a30; color: #ccc; vertical-align: top; }
+    .model-body tr:nth-child(even) td, .expand-msg-bubble tr:nth-child(even) td, #synthesis-body tr:nth-child(even) td { background: #13131a; }
     .model-body { flex: 1; padding: 12px 14px; font-size: 13px; line-height: 1.65; color: #555; font-family: 'DM Sans', sans-serif; white-space: pre-wrap; overflow-y: auto; min-height: 90px; max-height: 55vh; }
     .model-body.has-result { color: #e8e8e8; }
     .model-body.has-error { color: #ff8a8a; }
@@ -533,7 +552,7 @@
     document.getElementById(`dot-${id}`).className = 'status-dot done';
     const body = document.getElementById(`body-${id}`);
     body.className = 'model-body has-result';
-    body.textContent = text;
+    body.innerHTML = renderMarkdown(text);
     document.getElementById(`card-${id}`).style.boxShadow = 'none';
     document.getElementById(`retry-${id}`).disabled = false;
     updateAggregateBtn();
@@ -782,7 +801,7 @@
     label.textContent = role === 'user' ? 'You' : (MODELS.find(m => m.id === expandedId)?.name || 'AI');
     const bubble = document.createElement('div');
     bubble.className = 'expand-msg-bubble';
-    bubble.textContent = content;
+    if (role === 'assistant') { bubble.innerHTML = renderMarkdown(content); } else { bubble.textContent = content; }
     wrap.appendChild(label);
     wrap.appendChild(bubble);
     // Copy button on assistant messages
@@ -970,7 +989,7 @@
   function copyResponse(id) {
     const body = document.getElementById(`body-${id}`);
     if (!body.className.includes('has-result')) return;
-    navigator.clipboard.writeText(body.textContent.trim()).then(() => {
+    navigator.clipboard.writeText(body.innerText.trim()).then(() => {
       const btn = document.getElementById(`copy-${id}`);
       btn.textContent = '✓'; btn.classList.add('copied');
       setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 2000);
