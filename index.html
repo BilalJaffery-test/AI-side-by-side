@@ -920,79 +920,68 @@
   // ── Synthesis ─────────────────────────────────────────────
 
   function renderMarkdown(text) {
-    // Step 1: escape HTML entities
-    let html = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    // 1. Bold and italic FIRST (before any escaping)
+    let t = text
+      .replace(/\*\*([^*\n]+?)\*\*/g, '\x01BOLD\x02$1\x01/BOLD\x02')
+      .replace(/\*([^*\n]+?)\*/g,     '\x01EM\x02$1\x01/EM\x02');
 
-    // Step 2: extract and replace markdown tables with HTML before any other processing
+    // 2. Escape HTML entities
+    t = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    // 3. Restore bold/italic as real HTML
+    t = t.replace(/\x01BOLD\x02/g,'<strong>').replace(/\x01\/BOLD\x02/g,'</strong>');
+    t = t.replace(/\x01EM\x02/g,'<em>').replace(/\x01\/EM\x02/g,'</em>');
+
+    // 4. Tables
     const tableBlocks = [];
-    html = html.replace(/((?:[ \t]*\|.+\|[ \t]*\n)+)/g, function(match) {
+    t = t.replace(/((?:[ \t]*\|.+\|[ \t]*\n)+)/g, function(match) {
       const rows = match.trim().split('\n');
-      if (rows.length < 2) return match;
       const sepIdx = rows.findIndex(r => /^\|[-| :]+\|/.test(r.trim()));
       if (sepIdx < 1) return match;
       const hCells = rows[0].split('|').slice(1,-1).map(c => '<th>' + c.trim() + '</th>').join('');
-      const bRows = rows.slice(sepIdx+1).map(row => {
+      const bRows = rows.slice(sepIdx+1).filter(r => r.trim()).map(row => {
         const cells = row.split('|').slice(1,-1).map(c => '<td>' + c.trim() + '</td>').join('');
         return '<tr>' + cells + '</tr>';
       }).join('');
-      const tbl = '<table><thead><tr>' + hCells + '</tr></thead><tbody>' + bRows + '</tbody></table>';
-      tableBlocks.push(tbl);
+      tableBlocks.push('<table><thead><tr>' + hCells + '</tr></thead><tbody>' + bRows + '</tbody></table>');
       return '\x00TABLE' + (tableBlocks.length-1) + '\x00\n';
     });
 
-    // Step 3: headings
-    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    // 5. Headings
+    t = t.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    t = t.replace(/^## (.+)$/gm,  '<h2>$1</h2>');
+    t = t.replace(/^# (.+)$/gm,   '<h1>$1</h1>');
 
-    // Step 4: horizontal rules
-    html = html.replace(/^[-*_]{3,}[ \t]*$/gm, '<hr>');
+    // 6. Horizontal rules
+    t = t.replace(/^[-*_]{3,}[ \t]*$/gm, '<hr>');
 
-    // Step 5: bullet lists
-    html = html.replace(/((?:^[ \t]*[-*+•] .+\n?)+)/gm, function(match) {
-      const items = match.trim().split('\n').map(function(l) {
-        return '<li>' + l.replace(/^[ \t]*[-*+•] /, '').trim() + '</li>';
-      }).join('');
+    // 7. Bullet lists
+    t = t.replace(/((?:^[ \t]*[-*+•] .+\n?)+)/gm, function(match) {
+      const items = match.trim().split('\n').map(l => '<li>' + l.replace(/^[ \t]*[-*+•] /,'').trim() + '</li>').join('');
       return '<ul>' + items + '</ul>\n';
     });
 
-    // Step 6: numbered lists
-    html = html.replace(/((?:^[ \t]*\d+[.)\]] .+\n?)+)/gm, function(match) {
-      const items = match.trim().split('\n').map(function(l) {
-        return '<li>' + l.replace(/^[ \t]*\d+[.)\]] /, '').trim() + '</li>';
-      }).join('');
+    // 8. Numbered lists
+    t = t.replace(/((?:^[ \t]*\d+[.)]\s.+\n?)+)/gm, function(match) {
+      const items = match.trim().split('\n').map(l => '<li>' + l.replace(/^[ \t]*\d+[.)]\s/,'').trim() + '</li>').join('');
       return '<ol>' + items + '</ol>\n';
     });
 
-    // Step 7: bold and italic (only on text, not inside HTML tags)
-    html = html.replace(/\*\*([^*<>\n]+?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/\*([^*<>\n]+?)\*/g, '<em>$1</em>');
-
-    // Step 8: split into blocks and wrap plain text in <p>, convert newlines to <br>
-    const blocks = html.split(/\n{2,}/);
-    html = blocks.map(function(b) {
+    // 9. Split into blocks, wrap plain text in <p>
+    const blocks = t.split(/\n{2,}/);
+    t = blocks.map(function(b) {
       b = b.trim();
       if (!b) return '';
       if (/^\x00TABLE/.test(b) || /^<(h[1-3]|ul|ol|hr|table)/.test(b)) return b;
-      // Convert remaining single newlines to <br> in text blocks
-      return '<p>' + b.replace(/\n/g, '<br>') + '</p>';
+      return '<p>' + b.replace(/\n/g,'<br>') + '</p>';
     }).filter(Boolean).join('\n');
 
-    // Step 9: restore tables
+    // 10. Restore tables
     tableBlocks.forEach(function(tbl, i) {
-      html = html.replace('\x00TABLE' + i + '\x00', tbl);
+      t = t.replace('\x00TABLE' + i + '\x00', tbl);
     });
 
-    // Step 10: handle plain text tab-separated content (like o3 output)
-    // Convert lines with multiple tabs into a simple structured format
-    if (!html.includes('<table>') && html.includes('\t')) {
-      html = html.replace(/([^\n]+)\t([^\n]+)/g, '<span style="display:inline-block;min-width:160px;font-weight:600;color:#D97B4F">$1</span> $2');
-    }
-
-    return html;
+    return t;
   }
 
   function stripMarkdown(text) {
