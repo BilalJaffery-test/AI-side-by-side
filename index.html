@@ -934,15 +934,25 @@
     t = t.replace(/\x01BOLD\x02/g,'<strong>').replace(/\x01\/BOLD\x02/g,'</strong>');
     t = t.replace(/\x01EM\x02/g,'<em>').replace(/\x01\/EM\x02/g,'</em>');
 
-    // 4. Tables
+    // 4. Tables — handle both strict (|col|) and loose (col | col) formats
     const tableBlocks = [];
-    t = t.replace(/((?:[ \t]*\|.+\|[ \t]*\n)+)/g, function(match) {
-      const rows = match.trim().split('\n');
-      const sepIdx = rows.findIndex(r => /^\|[-| :]+\|/.test(r.trim()));
+    // Match blocks where at least 2 lines start with | or contain multiple |
+    t = t.replace(/((?:[ \t]*\|.*\n)+)/g, function(match) {
+      const rows = match.trim().split('\n').filter(r => r.trim());
+      if (rows.length < 2) return match;
+      // Find separator row (contains only |, -, :, spaces)
+      const sepIdx = rows.findIndex(r => /^\s*\|[-| :]+\|?\s*$/.test(r));
       if (sepIdx < 1) return match;
-      const hCells = rows[0].split('|').slice(1,-1).map(c => '<th>' + c.trim() + '</th>').join('');
-      const bRows = rows.slice(sepIdx+1).filter(r => r.trim()).map(row => {
-        const cells = row.split('|').slice(1,-1).map(c => '<td>' + c.trim() + '</td>').join('');
+      // Parse a row — split by | and clean up, handle both |a|b|c| and |a|b|c formats
+      function parseCells(row) {
+        let s = row.trim();
+        if (s.startsWith('|')) s = s.slice(1);
+        if (s.endsWith('|')) s = s.slice(0, -1);
+        return s.split('|').map(c => c.trim());
+      }
+      const hCells = parseCells(rows[0]).map(c => '<th>' + c + '</th>').join('');
+      const bRows = rows.slice(sepIdx+1).filter(r => r.trim() && !/^\s*\|[-| :]+\|?\s*$/.test(r)).map(row => {
+        const cells = parseCells(row).map(c => '<td>' + c + '</td>').join('');
         return '<tr>' + cells + '</tr>';
       }).join('');
       tableBlocks.push('<table><thead><tr>' + hCells + '</tr></thead><tbody>' + bRows + '</tbody></table>');
