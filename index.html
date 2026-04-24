@@ -304,7 +304,6 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
-      <button id="faceoff-btn" onclick="openFaceoff()" style="background:transparent;border:1px solid #2a2a30;border-radius:8px;padding:6px 12px;color:#aaa;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;white-space:nowrap;">⚔ Face-off</button>
       <button id="settings-btn" onclick="toggleSettings()">⚙ API Keys</button>
     </div>
   </div>
@@ -392,6 +391,7 @@
         <span id="prompt-hint">Ctrl + Enter to run</span>
         <div style="display:flex;gap:8px;align-items:center;">
           <button id="aggregate-btn" onclick="aggregateResponses()" style="background:#1e1e24;border:none;border-radius:8px;padding:7px 14px;color:#444;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;" disabled>⊕ Synthesise</button>
+          <button id="faceoff-btn" onclick="openFaceoff()" style="background:#1e1e24;border:none;border-radius:8px;padding:7px 14px;color:#444;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;" disabled>⚔ Face-off</button>
           <button id="run-btn" onclick="runAll()">Compare →</button>
         </div>
       </div>
@@ -742,9 +742,39 @@
     if (!conversationMode) clearHistory();
   }
   function clearHistory() {
-    MODELS.forEach(m => { histories[m.id] = []; behindTurns[m.id] = 0; });
+    MODELS.forEach(m => { histories[m.id] = []; behindTurns[m.id] = 0; lastPrompt[m.id] = null; });
     updateTurnCount();
     document.querySelectorAll('.behind-badge').forEach(b => b.remove());
+    // Wipe prompt input
+    const promptInput = document.getElementById('prompt-input');
+    promptInput.value = '';
+    onPromptInput(); // reset run btn state
+    clearPasteImage('main');
+    // Reset all cards
+    MODELS.forEach(m => {
+      const body = document.getElementById('body-' + m.id);
+      body.className = 'model-body';
+      body.innerHTML = '<span style="color:#444">Response will appear here</span>';
+      document.getElementById('dot-' + m.id).className = 'status-dot';
+      document.getElementById('retry-' + m.id).disabled = true;
+      document.getElementById('card-' + m.id).style.boxShadow = 'none';
+    });
+    // Hide synthesis
+    document.getElementById('synthesis-card').classList.remove('visible');
+    document.getElementById('synthesis-body').innerHTML = '';
+    // Reset aggregate + faceoff buttons
+    const synthBtn = document.getElementById('aggregate-btn');
+    synthBtn.disabled = true;
+    synthBtn.style.background = '#1e1e24';
+    synthBtn.style.color = '#444';
+    synthBtn.style.border = 'none';
+    const faceoffBtn = document.getElementById('faceoff-btn');
+    faceoffBtn.disabled = true;
+    faceoffBtn.style.background = '#1e1e24';
+    faceoffBtn.style.color = '#444';
+    faceoffBtn.style.border = 'none';
+    // Show empty state
+    document.getElementById('empty-state').style.display = '';
   }
   function updateTurnCount() {
     const turns = Math.max(0, ...MODELS.map(m => Math.floor(histories[m.id].length / 2)));
@@ -1310,12 +1340,17 @@
 
   function updateAggregateBtn() {
     const hasResults = MODELS.some(m => document.getElementById(`body-${m.id}`)?.className.includes('has-result'));
-    const btn = document.getElementById('aggregate-btn');
+    const synthBtn = document.getElementById('aggregate-btn');
+    const faceoffBtn = document.getElementById('faceoff-btn');
     if (hasResults) {
-      btn.disabled = false;
-      btn.style.background = 'linear-gradient(135deg, #2a1a0e, #3a2210)';
-      btn.style.color = '#D97B4F';
-      btn.style.border = '1px solid #D97B4F44';
+      synthBtn.disabled = false;
+      synthBtn.style.background = 'linear-gradient(135deg, #2a1a0e, #3a2210)';
+      synthBtn.style.color = '#D97B4F';
+      synthBtn.style.border = '1px solid #D97B4F44';
+      faceoffBtn.disabled = false;
+      faceoffBtn.style.background = 'linear-gradient(135deg, #1a0e2a, #2a1040)';
+      faceoffBtn.style.color = '#9B5DE5';
+      faceoffBtn.style.border = '1px solid #9B5DE544';
     }
   }
 
@@ -1657,7 +1692,7 @@
         updateFaceoffMsg(2, round, r2);
 
         setJudgeLoading(true);
-        const judgePrompt = 'You are an impartial judge evaluating two AI responses. Labels: AI Alpha and AI Beta only — no model names.\n\nTopic: "' + prompt + '"\n\nRound ' + round + ' of ' + faceoffRounds + ':\n\nAI Alpha:\n"' + r1 + '"\n\nAI Beta:\n"' + r2 + '"\n\nPrevious convergence: ' + lastConvergence + '%\n\nRespond in this EXACT format:\nCONVERGENCE: [0-100]\nASSESSMENT: [2-3 sentences on agreement/disagreement]\nCONTINUE: [YES or NO]';
+        const judgePrompt = 'You are an impartial judge. The user asked: "' + prompt + '"\n\nTwo AIs (labelled Alpha and Beta only) are debating this. Your job is to assess how well each addresses the original question and how much their positions have converged.\n\nRound ' + round + ' of ' + faceoffRounds + ':\n\nAI Alpha:\n"' + r1 + '"\n\nAI Beta:\n"' + r2 + '"\n\nPrevious convergence: ' + lastConvergence + '%\n\nRespond in this EXACT format:\nCONVERGENCE: [0-100]\nASSESSMENT: [2-3 sentences: how well they address the question and where they agree/disagree]\nCONTINUE: [YES or NO]';
 
         let convergence = lastConvergence;
         let shouldContinue = true;
