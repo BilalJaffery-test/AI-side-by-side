@@ -284,6 +284,122 @@
     #expand-footer { padding: 6px 12px 10px; display: flex; justify-content: flex-end; }
     #expand-send { background: linear-gradient(135deg, #D97B4F, #c4623a); border: none; border-radius: 8px; padding: 7px 18px; color: #fff; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.2s; }
     #expand-send:hover { opacity: 0.88; }
+
+    /* ══ MOBILE RESPONSIVE ══════════════════════════════════ */
+    @media (max-width: 768px) {
+
+      /* ── Header ── */
+      #header { padding: 12px 16px; gap: 8px; }
+      #header h1 { font-size: 20px; }
+      #header p { font-size: 11px; }
+      #header-right { gap: 6px; }
+      .toggle-label { font-size: 11px; }
+      #settings-btn { font-size: 11px; padding: 5px 10px; }
+
+      /* ── Settings panel ── */
+      #settings-panel { padding: 12px 16px; gap: 10px; }
+      .key-field { flex: 1 1 100%; }
+
+      /* ── Usage bar ── */
+      #usage-bar { padding: 5px 16px; gap: 6px; }
+      .usage-pill { font-size: 10px; padding: 2px 8px; }
+      #usage-total { font-size: 10px; }
+      #check-balance-btn { font-size: 10px; padding: 2px 8px; }
+
+      /* ── History bar ── */
+      #history-bar { padding: 6px 16px; }
+
+      /* ── Prompt area ── */
+      #prompt-area { padding: 10px 16px; }
+      #prompt-input { font-size: 16px; min-height: 56px; padding: 10px 12px 6px; }
+      #prompt-footer { padding: 6px 10px 8px; flex-wrap: wrap; gap: 6px; }
+      #prompt-hint { font-size: 10px; width: 100%; order: 2; }
+      #prompt-footer > div { order: 1; width: 100%; justify-content: stretch; }
+      #prompt-footer > div button { flex: 1; font-size: 12px; padding: 9px 8px; }
+      #run-btn { flex: 1.5 !important; }
+
+      /* ── Results: stack cards vertically ── */
+      #results { padding: 12px 16px; gap: 10px; flex-direction: column; }
+      .model-card { min-width: unset; width: 100%; flex: none; }
+      .model-body { max-height: 40vh; font-size: 13px; }
+
+      /* ── Synthesis card ── */
+      #synthesis-card { margin: 0 16px 16px; }
+      #synthesis-body { font-size: 13px; max-height: 40vh; }
+
+      /* ── Balance panel ── */
+      #balance-panel { padding: 10px 16px; }
+      .balance-card { flex: 1 1 calc(50% - 6px); }
+
+      /* ── Expand view ── */
+      #expand-header { padding: 10px 14px; }
+      #expand-name { font-size: 16px !important; }
+      #expand-messages { padding: 12px 14px; gap: 10px; }
+      .expand-msg { max-width: 88%; }
+      .expand-msg-bubble { font-size: 13px; padding: 9px 12px; }
+      #expand-input-area { padding: 8px 12px; }
+      #expand-textarea { font-size: 16px; }
+      #expand-send { padding: 9px 16px; }
+      .sync-toggle-group { padding: 4px 8px; }
+      .sync-label { font-size: 10px; }
+
+      /* ── Synthesis expand ── */
+      #synthesis-expand-header { padding: 10px 14px; }
+      #synthesis-expand-messages { padding: 12px 14px; }
+      #synthesis-expand-input-area { padding: 8px 12px; }
+      #synthesis-expand-textarea { font-size: 16px; }
+
+      /* ── Face-off setup ── */
+      #faceoff-header { padding: 10px 14px; }
+      #faceoff-setup { padding: 20px 16px; gap: 16px; }
+      #faceoff-setup h2 { font-size: 18px; }
+      .faceoff-row { gap: 10px; }
+      .faceoff-ai-select { min-width: 120px; font-size: 13px; padding: 8px 12px; }
+      #faceoff-prompt-input { font-size: 16px; min-height: 70px; }
+      #faceoff-start-btn { font-size: 14px; padding: 10px 24px; }
+      .faceoff-round-btn { padding: 6px 14px; font-size: 12px; }
+
+      /* ── Face-off arena: tabbed on mobile ── */
+      #faceoff-columns { flex-direction: column; overflow-y: auto; }
+      .faceoff-col { min-height: 0; flex: none; }
+      .faceoff-col-messages { max-height: 35vh; }
+
+      /* Tab switcher for face-off columns */
+      #faceoff-tab-bar { display: flex !important; }
+
+      /* Show/hide columns based on active tab */
+      #faceoff-col-1.tab-hidden { display: none; }
+      #faceoff-col-2.tab-hidden { display: none; }
+
+      /* ── Judge panel ── */
+      #faceoff-judge { padding: 10px 14px; max-height: 160px; }
+      #faceoff-judge-text { font-size: 12px; }
+      #faceoff-verdict-body { font-size: 12px; max-height: 160px; }
+      #faceoff-verdict { margin: 0 12px 12px; }
+    }
+
+    /* Tab bar (hidden on desktop, shown on mobile) */
+    #faceoff-tab-bar {
+      display: none;
+      background: #13131a;
+      border-bottom: 1px solid #1e1e24;
+      flex-shrink: 0;
+    }
+    .faceoff-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      color: #555;
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .faceoff-tab.active { color: #e8e8e8; border-bottom-color: #D97B4F; }
+
   </style>
 </head>
 <body>
@@ -469,6 +585,11 @@
 
   <!-- Arena -->
   <div id="faceoff-arena">
+    <!-- Mobile tab switcher (hidden on desktop) -->
+    <div id="faceoff-tab-bar">
+      <button class="faceoff-tab active" id="tab-1" onclick="switchFaceoffTab(1)">Alpha</button>
+      <button class="faceoff-tab" id="tab-2" onclick="switchFaceoffTab(2)">Beta</button>
+    </div>
     <div id="faceoff-columns">
       <div class="faceoff-col" id="faceoff-col-1">
         <div class="faceoff-col-header">
@@ -1645,6 +1766,9 @@
       document.getElementById('faceoff-msgs-1').innerHTML = '';
       document.getElementById('faceoff-msgs-2').innerHTML = '';
       document.getElementById('faceoff-name-1').textContent = ai1.name;
+      document.getElementById('tab-1').textContent = ai1.name;
+      document.getElementById('tab-2').textContent = ai2.name;
+      switchFaceoffTab(1); // reset to first tab on mobile
       document.getElementById('faceoff-name-2').textContent = ai2.name;
       document.getElementById('faceoff-dot-1').style.background = ai1.color;
       document.getElementById('faceoff-dot-2').style.background = ai2.color;
@@ -1751,6 +1875,15 @@
         btn.textContent = '\u2713 Copied';
         setTimeout(function() { btn.textContent = '\u2358 Copy'; }, 2000);
       });
+    }
+
+
+    // ── Mobile Face-off Tab Switcher ─────────────────────────
+    function switchFaceoffTab(col) {
+      document.getElementById('faceoff-col-1').classList.toggle('tab-hidden', col !== 1);
+      document.getElementById('faceoff-col-2').classList.toggle('tab-hidden', col !== 2);
+      document.getElementById('tab-1').classList.toggle('active', col === 1);
+      document.getElementById('tab-2').classList.toggle('active', col === 2);
     }
 
   initCards();
